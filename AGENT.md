@@ -24,7 +24,7 @@ Other plugin components:
 Per-ticker outputs are organized into two subdirectories — write new artifacts to the matching folder, **not** to the repo root:
 
 - `swing-setups/` — every `<TICKER>_swing_setup_<YYYY-MM-DD>.html` produced by the swing-trade-setup skill goes here.
-- `research-reports/` — every `<TICKER>_*_report.html` produced by the investment-research-report skill goes here.
+- `research-reports/` — every `<TICKER>_research_report_<YYYY-MM-DD>.html` produced by the investment-research-report skill goes here.
 
 Each skill's `SKILL.md` says generically "write to the user's Investment folder" — in this workspace, that resolves to the appropriate subfolder above. When you call the builders, set `--out` (or `b.build(...)`) to the subfolder path:
 
@@ -35,7 +35,7 @@ python skills/swing-trade-setup/scripts/build_slides.py \
     --out "swing-setups/<TICKER>_swing_setup_<YYYY-MM-DD>.html"
 
 # research (Python API)
-b.build("research-reports/<TICKER>_research_report.html")
+b.build("research-reports/<TICKER>_research_report_<YYYY-MM-DD>.html")
 # No verify step needed — open the HTML in any browser to review
 ```
 
@@ -85,7 +85,7 @@ b.section("1. Snapshot")
 b.snapshot({...})
 # ... sections 2–10 ...
 b.disclaimer()
-b.build("research-reports/NVDA_research_report.html")
+b.build("research-reports/NVDA_research_report_2026-04-21.html")
 ```
 
 The legacy `scripts/build_report.py` (ReportLab PDF + `verify_pdf()`) is kept for reference only; do not use it for new reports.
@@ -130,7 +130,7 @@ These are the failure modes the user has called out — each one is enforced ins
 
 ## Output naming conventions (so files sort cleanly)
 
-- Research HTML reports: `research-reports/<TICKER>_<descriptor>_report.html` (e.g., `research-reports/NVDA_research_report.html`, `research-reports/BTDR_research_report.html`).
+- Research HTML reports: `research-reports/<TICKER>_research_report_<YYYY-MM-DD>.html` (date = as-of close; e.g., `research-reports/NVDA_research_report_2026-04-21.html`, `research-reports/BTDR_research_report_2026-10-04.html`).
 - Swing decks: `swing-setups/<TICKER>_swing_setup_<YYYY-MM-DD>.html` (date is the as-of close).
 
 ## Playwright MCP screenshots

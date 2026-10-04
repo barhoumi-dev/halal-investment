@@ -20,7 +20,7 @@ Before starting, read `.claude/halal-investing.local.md` in the current working 
 | `research_dir` | `research-reports` | Output folder (relative to the agent's working directory unless absolute). Create it if absent. |
 | `pif_strict` | `true` | When `false`, all four PIF steps are reported for information only and AAOIFI alone drives `shariah_status`. |
 
-Save the report to `<research_dir>/<TICKER>_research_report.html` under the directory the agent is running from, keeping the repo's `research-reports/` structure. If no settings file exists and you cannot determine where the user wants the output saved, ask once before writing the file.
+Save the report to `<research_dir>/<TICKER>_research_report_<YYYY-MM-DD>.html` (date = as-of close) under the directory the agent is running from, keeping the repo's `research-reports/` structure. If no settings file exists and you cannot determine where the user wants the output saved, ask once before writing the file.
 
 ## The workflow
 
@@ -28,7 +28,7 @@ Save the report to `<research_dir>/<TICKER>_research_report.html` under the dire
 2. **Pull the data.** Use WebSearch + WebFetch against the source priority list in `references/data_sources.md`. Pull *real numbers* from filings/IR pages/screeners — do not estimate if actual figures are available. Shariah inputs (four quarters of interest income/expense, balance-sheet ratios) are pulled by the agent in step 3 — fetch them here only if the agent is unavailable.
 3. **Run the four Shariah lenses via the `shariah-screener` agent.** For equities, dispatch the `halal-investing:shariah-screener` agent **in the background** with the ticker, company name, and `pif_strict` value. It pulls four consecutive quarters of filings and returns Zoya, Musaffa, AAOIFI ratios, PIF 4-step results, and purification cents/share as a structured block — use those numbers for Section 3 (3a–3d), and pass its `shariah_status:` line straight to the `HtmlReportBuilder` constructor. Continue pulling non-Shariah data while it runs. If the agent is unavailable, run the lenses inline per `references/aaoifi_screen.md` and `references/pif_screen.md`. Crypto tokens skip the agent and follow `references/crypto_template.md`. Don't skip a lens because a free screener didn't have the name.
 4. **Build the HTML report.** Use the builder at `skills/investment-research-report/scripts/build_report_html.py` (relative to the agent's working directory, the repo root) — it renders stat-card snapshot grids, AAOIFI compliance rows with progress bars and PASS/FAIL badges, standard data tables with zebra striping, and inline SVG charts. Do not write the HTML from scratch; the helpers exist to ensure consistent design across all reports.
-5. **Deliver.** Save to `<research_dir>/<TICKER>_research_report.html`, share the `computer://` link, and add a 2-3 sentence plain-language thesis. Close with the disclaimer.
+5. **Deliver.** Save to `<research_dir>/<TICKER>_research_report_<YYYY-MM-DD>.html` (date = as-of close), share the `computer://` link, and add a 2-3 sentence plain-language thesis. Close with the disclaimer.
 
 ## Report structure (equity)
 
@@ -69,7 +69,7 @@ Key rules:
 - **Use `b.aaoifi(rows)` for the AAOIFI screen** — it renders each ratio as a card row with a pass/fail badge and a visual progress bar showing the ratio vs. its threshold. Each row is `(ratio_name, threshold_str, actual_str, passed: bool)` — e.g. `("Interest-bearing debt / Market cap", "< 30%", "0.3%", True)`. `passed` must be a real bool: the string `"FAIL"` is truthy and would render a green PASS badge.
 - **SVG charts are inserted with `b.html(svg_fn(...))`** — call `svg_revenue_chart(years, revenue, npat)`, `svg_price_chart(prices, dates, ma50, ma200)`, or `svg_analyst_dotplot(low, median, current, high)` and pass the returned string to `b.html()`. All three functions are importable from `build_report_html`.
 - **No verification step needed.** The HTML file is the deliverable. Open it in any browser to review; no rendering pipeline required.
-- **Output path:** `<research_dir>/<TICKER>_research_report.html`.
+- **Output path:** `<research_dir>/<TICKER>_research_report_<YYYY-MM-DD>.html` (date = as-of close).
 
 ## Data sourcing rules
 

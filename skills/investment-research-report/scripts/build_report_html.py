@@ -24,7 +24,7 @@ Usage:
     b.html(svg_analyst_dotplot(120, 175, 142, 220))
     b.analysts([...])
     b.disclaimer()
-    b.build("research-reports/NVDA_research_report.html")
+    b.build("research-reports/NVDA_research_report_2026-05-10.html")
 """
 from __future__ import annotations
 

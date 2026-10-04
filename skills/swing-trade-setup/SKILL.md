@@ -119,7 +119,7 @@ If a binary catalyst (earnings, FDA decision, regulator ruling, M&A close) sits 
 
 ## Reading the user's portfolio context
 
-Glob `<research_dir>/<TICKER>_*_report.html` to check whether a fundamental report on this ticker already exists. If one does, reuse the Shariah verdict and the bull/bear context for the Halal flag and the catalysts slide. Map the report's header status to the quick-flag vocabulary: `halal` → Compliant, `haram` → Non-compliant, `review` → Doubtful. The technical levels still need to be pulled fresh.
+Glob `<research_dir>/<TICKER>_research_report_*.html` to check whether a fundamental report on this ticker already exists. If one does, reuse the Shariah verdict and the bull/bear context for the Halal flag and the catalysts slide. Map the report's header status to the quick-flag vocabulary: `halal` → Compliant, `haram` → Non-compliant, `review` → Doubtful. The technical levels still need to be pulled fresh.
 
 ## Reference files
 
