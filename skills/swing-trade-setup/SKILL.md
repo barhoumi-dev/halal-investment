@@ -43,10 +43,12 @@ Before starting, read `.claude/halal-investing.local.md` in the current working 
 
 | Field | Default | Effect here |
 |---|---|---|
-| `swing_dir` | `swing-setups` | Output folder (relative to cwd unless absolute). Create it if absent. |
+| `swing_dir` | `swing-setups` | Output folder (relative to the agent's working directory unless absolute). Create it if absent. |
 | `research_dir` | `research-reports` | Where to look for a prior report on the same ticker. |
 | `halal_mandate` | `true` | When `true`, a non-compliant Halal flag overrides BUY into AVOID. When `false`, show the flag but let the technicals drive the verdict. |
 | `default_horizon_weeks` | `2-8` | Horizon used for the earnings-window check and catalyst slide unless the user names one. |
+
+Save the deck to `<swing_dir>/<TICKER>_swing_setup_<YYYY-MM-DD>.html` under the directory the agent is running from, keeping the repo's `swing-setups/` structure. If no settings file exists and you cannot determine where the user wants the output saved, ask once before writing the file.
 
 ## The workflow
 
@@ -82,10 +84,10 @@ Before starting, read `.claude/halal-investing.local.md` in the current working 
 7. **Generate the deck.** Build a JSON spec following the schema in `references/output_template.md`, write it to a temp path, then run:
 
    ```
-   python "${CLAUDE_PLUGIN_ROOT}/skills/swing-trade-setup/scripts/build_slides.py" --spec <tmp>/setup_spec.json --out "<swing_dir>/<TICKER>_swing_setup_<YYYY-MM-DD>.html"
+   python skills/swing-trade-setup/scripts/build_slides.py --spec <tmp>/setup_spec.json --out "<swing_dir>/<TICKER>_swing_setup_<YYYY-MM-DD>.html"
    ```
 
-   If `${CLAUDE_PLUGIN_ROOT}` is not expanded, Glob `**/swing-trade-setup/scripts/build_slides.py` to locate the script.
+   `skills/` resolves from the agent's working directory (the repo root). If the script isn't there, Glob `**/swing-trade-setup/scripts/build_slides.py` from the working directory to locate it.
 
    The script writes a single self-contained HTML file. It draws the levels chart, indicator gauges, and risk/reward bar as inline SVG — there are no external dependencies and the file works offline.
 

@@ -1,17 +1,17 @@
-# CLAUDE.md
+# AGENT.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to AI coding agents (Claude Code, Pi, or similar) when working with code in this repository.
 
 ## What this repo is
 
-This directory is **the user's "Investment folder"** — both the source of the `halal-investing` Claude Code plugin and the delivery folder where its generated HTML reports and decks accumulate. It is not a typical software project: there is no package manifest, no build system, no tests.
+This directory is **the user's "Investment folder"** — both the source of the `halal-investing` plugin and the delivery folder where its generated HTML reports and decks accumulate. It is not a typical software project: there is no package manifest, no build system, no tests.
 
-The repo root is also the **`halal-investing` Claude Code plugin** (manifest `.claude-plugin/plugin.json`, local marketplace `.claude-plugin/marketplace.json`, user docs in `README.md`). Its two model-invoked skills live under `skills/`:
+The repo root is also the **`halal-investing` plugin** — distributed as a Claude Code plugin (manifest `.claude-plugin/plugin.json`, local marketplace `.claude-plugin/marketplace.json`, user docs in `README.md`), with the skills also runnable by other agents directly from this folder. Its two model-invoked skills live under `skills/`:
 
 - `skills/investment-research-report/` — produces a 10-section equity (or 7-section crypto) research **HTML report** via `scripts/build_report_html.py` (self-contained, no external deps). The legacy `scripts/build_report.py` (ReportLab PDF) is preserved for reference.
 - `skills/swing-trade-setup/` — produces a 6-slide self-contained **HTML deck** (inline SVG, arrow-key navigable) for a 2-to-8-week swing trade via `scripts/build_slides.py`.
 
-Each skill folder contains `SKILL.md` (the prompt that drives Claude), `references/*.md` (templates + methodology), and `scripts/*.py` (the deterministic builders). The matching `.skill` zip archives in `cowork-skills/` are **portable, version-pinned distributables** — useful for sharing or re-installing, but the copies under `skills/` are the live ones the plugin ships.
+Each skill folder contains `SKILL.md` (the prompt that drives the agent), `references/*.md` (templates + methodology), and `scripts/*.py` (the deterministic builders). The matching `.skill` zip archives in `cowork-skills/` are **portable, version-pinned distributables** — useful for sharing or re-installing, but the copies under `skills/` are the live ones the plugin ships.
 
 Other plugin components:
 - `skills/research/`, `skills/swing/` — thin slash-command entry points (`/halal-investing:research <TICKER>`, `/halal-investing:swing <TICKER>`), `disable-model-invocation: true` so they never compete with the two skills above.
@@ -39,11 +39,11 @@ b.build("research-reports/<TICKER>_research_report.html")
 # No verify step needed — open the HTML in any browser to review
 ```
 
-Artifacts left at the repo root are intentionally **not** per-ticker: `CLAUDE.md`, `README.md`, the plugin dirs (`.claude-plugin/`, `skills/`, `agents/`, `examples/`), `cowork-skills/`, and the two skill-tooling HTMLs (`swing-trade-setup-eval-viewer.html`, `swing-trade-setup-results-slides.html` — these are skill-development/evaluation aids, not deliverables for a specific ticker).
+Artifacts left at the repo root are intentionally **not** per-ticker: `AGENT.md`, `README.md`, the plugin dirs (`.claude-plugin/`, `skills/`, `agents/`, `examples/`), `cowork-skills/`, and the two skill-tooling HTMLs (`swing-trade-setup-eval-viewer.html`, `swing-trade-setup-results-slides.html` — these are skill-development/evaluation aids, not deliverables for a specific ticker).
 
 ## Working on the skills
 
-Edit files directly under `skills/<skill-name>/`. Inside skills and agents, reference bundled files as `${CLAUDE_PLUGIN_ROOT}/skills/<skill-name>/...` — an installed plugin runs from `~/.claude/plugins/cache/`, not from this folder, so cwd-relative paths break. The internal layout each skill expects is fixed:
+Edit files directly under `skills/<skill-name>/`. Inside skills and agents, reference bundled files relative to the agent's working directory (the repo root), e.g. `skills/<skill-name>/...` — the skills run from this folder with cwd-relative paths, so any agent launched from the repo root resolves them correctly. The internal layout each skill expects is fixed:
 
 ```
 skills/<skill-name>/
@@ -54,9 +54,11 @@ skills/<skill-name>/
 
 Do not rename `references/` or `scripts/` — `SKILL.md` references them by exact path.
 
-Distribution is via GitHub (`/plugin marketplace add barhoumi-dev/halal-investment`), which clones the repo, so `.gitignore` keeps deliverables out. For local development use `claude --plugin-dir .` (reads in place). **Never** `/plugin marketplace add .` on this folder: a local-path marketplace copies the whole directory into `~/.claude/plugins/cache`, ignoring `.gitignore` — that's ~155 MB including `halal-investment-site/`, every report, and `.claude/settings.local.json`. After a release, bump `version` in `plugin.json`.
+Distribution (Claude Code) is via GitHub (`/plugin marketplace add barhoumi-dev/halal-investment`), which clones the repo, so `.gitignore` keeps deliverables out. For local development use `claude --plugin-dir .` (reads in place). **Never** `/plugin marketplace add .` on this folder: a local-path marketplace copies the whole directory into `~/.claude/plugins/cache`, ignoring `.gitignore` — that's ~155 MB including `halal-investment-site/`, every report, and `.claude/settings.local.json`. After a release, bump `version` in `plugin.json`.
 
-Do **not** recreate `.claude/skills/` — a project-local copy would load alongside the plugin copy and double-trigger.
+Other agents load the same skills directly from the repo root: `.pi/settings.json` points its `skills` resource at the `skills/` folder. Because the skills use cwd-relative paths, any agent launched from the repo root works without plugin installation.
+
+Do **not** recreate `.claude/skills/` or `.pi/skills/` — a project-local copy would load alongside the repo-root `skills/` folder and double-trigger. Point agents at the repo-root `skills/` folder instead (`.pi/settings.json` already does this).
 
 To re-pack a skill into a portable `.skill` archive (archives contain a top-level `<skill-name>/` folder):
 
@@ -72,7 +74,7 @@ Both builders are standalone Python scripts. There is no shared dependency manif
 
 ### investment-research-report — `scripts/build_report_html.py`
 
-Library-style API (not a CLI), pure stdlib. Imported by Claude inside the skill workflow:
+Library-style API (not a CLI), pure stdlib. Imported by the agent inside the skill workflow:
 
 ```python
 import sys; sys.path.insert(0, "skills/investment-research-report/scripts")

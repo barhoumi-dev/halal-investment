@@ -17,15 +17,17 @@ Before starting, read `.claude/halal-investing.local.md` in the current working 
 
 | Field | Default | Effect here |
 |---|---|---|
-| `research_dir` | `research-reports` | Output folder (relative to cwd unless absolute). Create it if absent. |
+| `research_dir` | `research-reports` | Output folder (relative to the agent's working directory unless absolute). Create it if absent. |
 | `pif_strict` | `true` | When `false`, all four PIF steps are reported for information only and AAOIFI alone drives `shariah_status`. |
+
+Save the report to `<research_dir>/<TICKER>_research_report.html` under the directory the agent is running from, keeping the repo's `research-reports/` structure. If no settings file exists and you cannot determine where the user wants the output saved, ask once before writing the file.
 
 ## The workflow
 
 1. **Decide: equity or crypto.** If the user names a stock ticker, use the 10-section equity template (`references/report_structure.md`). If a crypto token, use the 7-section crypto template (`references/crypto_template.md`).
 2. **Pull the data.** Use WebSearch + WebFetch against the source priority list in `references/data_sources.md`. Pull *real numbers* from filings/IR pages/screeners — do not estimate if actual figures are available. Shariah inputs (four quarters of interest income/expense, balance-sheet ratios) are pulled by the agent in step 3 — fetch them here only if the agent is unavailable.
 3. **Run the four Shariah lenses via the `shariah-screener` agent.** For equities, dispatch the `halal-investing:shariah-screener` agent **in the background** with the ticker, company name, and `pif_strict` value. It pulls four consecutive quarters of filings and returns Zoya, Musaffa, AAOIFI ratios, PIF 4-step results, and purification cents/share as a structured block — use those numbers for Section 3 (3a–3d), and pass its `shariah_status:` line straight to the `HtmlReportBuilder` constructor. Continue pulling non-Shariah data while it runs. If the agent is unavailable, run the lenses inline per `references/aaoifi_screen.md` and `references/pif_screen.md`. Crypto tokens skip the agent and follow `references/crypto_template.md`. Don't skip a lens because a free screener didn't have the name.
-4. **Build the HTML report.** Use `${CLAUDE_PLUGIN_ROOT}/skills/investment-research-report/scripts/build_report_html.py` — it renders stat-card snapshot grids, AAOIFI compliance rows with progress bars and PASS/FAIL badges, standard data tables with zebra striping, and inline SVG charts. Do not write the HTML from scratch; the helpers exist to ensure consistent design across all reports.
+4. **Build the HTML report.** Use the builder at `skills/investment-research-report/scripts/build_report_html.py` (relative to the agent's working directory, the repo root) — it renders stat-card snapshot grids, AAOIFI compliance rows with progress bars and PASS/FAIL badges, standard data tables with zebra striping, and inline SVG charts. Do not write the HTML from scratch; the helpers exist to ensure consistent design across all reports.
 5. **Deliver.** Save to `<research_dir>/<TICKER>_research_report.html`, share the `computer://` link, and add a 2-3 sentence plain-language thesis. Close with the disclaimer.
 
 ## Report structure (equity)
@@ -49,16 +51,16 @@ For crypto reports, use the parallel 7-section structure in `references/crypto_t
 
 Use `build_report_html.py` exclusively — do not write raw HTML from scratch. The builder enforces the HalalInvest design system (navy `#0B3C5D` / amber `#C69214` palette, sidebar TOC, stat-card snapshot grid, compliance rows with progress bars) and keeps all reports visually consistent.
 
-Import the builder by putting its folder on `sys.path` (the plugin may be installed anywhere):
+Import the builder by putting its folder on `sys.path` (the skill lives under `<repo-root>/skills`):
 
 ```python
 import os, sys
-root = os.environ.get("CLAUDE_PLUGIN_ROOT") or r"${CLAUDE_PLUGIN_ROOT}"   # raw string: Windows paths contain backslashes
+root = os.getcwd()   # the agent runs from the repo root; the skill lives under <root>/skills
 sys.path.insert(0, os.path.join(root, "skills", "investment-research-report", "scripts"))
 from build_report_html import HtmlReportBuilder, svg_revenue_chart, svg_price_chart, svg_analyst_dotplot
 ```
 
-If the import fails because the root did not resolve, Glob `**/investment-research-report/scripts/build_report_html.py` with `path` set to `~/.claude/plugins` and use that folder instead.
+If the import fails, Glob `**/investment-research-report/scripts/build_report_html.py` from the working directory and use the folder that contains it.
 
 Key rules:
 
