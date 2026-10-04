@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>IREN — Swing Trade Setup (2026-06-15)</title>
+<style>
+:root {
+  --navy: #0B3C5D;
+  --navy-2: #14507A;
+  --amber: #C69214;
+  --amber-2: #E0AE2D;
+  --green: #2E7D32;
+  --red: #C62828;
+  --gray-1: #F6F6F6;
+  --gray-2: #E7E7E7;
+  --gray-3: #C9C9C9;
+  --gray-4: #888888;
+  --ink: #1d1d1d;
+  --muted: #555555;
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0; height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  color: var(--ink); background: #0a0f15; overflow: hidden;
+}
+.deck { position: relative; width: 100vw; height: 100vh; overflow: hidden; }
+.slide {
+  position: absolute; inset: 0; background: #fff;
+  padding: 56px 72px 72px;
+  display: flex; flex-direction: column;
+  opacity: 0; transform: translateX(28px);
+  transition: opacity .25s ease, transform .25s ease;
+  pointer-events: none; overflow-y: auto;
+}
+.slide.active { opacity: 1; transform: none; pointer-events: auto; }
+.slide h1 { color: var(--navy); margin: 0; font-size: 32px; line-height: 1.15; letter-spacing: -.4px; }
+.slide h2 { color: var(--navy); margin: 0 0 12px 0; font-size: 18px; }
+.slide h3 { color: var(--amber); margin: 0; font-size: 13px; text-transform: uppercase; letter-spacing: .14em; font-weight: 700; }
+.slide p { font-size: 15.5px; line-height: 1.5; }
+.rule { height: 3px; width: 88px; background: var(--amber); margin: 12px 0 22px; border-radius: 2px; }
+.title-label {
+  display: block; font-size: 11px; color: var(--muted);
+  text-transform: uppercase; letter-spacing: .12em; font-weight: 700;
+  margin-bottom: 4px;
+}
+.muted { color: var(--muted); }
+
+/* Title slide */
+.title-slide { padding: 0; color: #fff; }
+.title-bg {
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-2) 100%);
+}
+.title-inner { position: relative; padding: 80px 96px; flex: 1; display: flex; flex-direction: column; }
+.title-slide h3 { color: var(--amber-2); }
+.title-slide h1 { color: #fff; font-size: 64px; line-height: 1.05; letter-spacing: -1.5px; }
+.title-slide .rule { background: var(--amber); }
+.title-name { font-weight: 400; color: rgba(255,255,255,.7); font-size: .55em; vertical-align: middle; }
+.title-row {
+  display: flex; gap: 36px; margin: 18px 0 28px; color: rgba(255,255,255,.92);
+}
+.title-row .title-label { color: var(--amber-2); }
+.title-row .title-value { font-size: 22px; font-weight: 700; }
+.title-pill {
+  display: inline-block; padding: 4px 14px; border-radius: 999px;
+  font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+}
+.big-verdict { margin-top: auto; padding-top: 24px; }
+.verdict-pill {
+  display: inline-block; padding: 14px 36px; border-radius: 14px;
+  font-size: 48px; font-weight: 800; letter-spacing: 4px;
+}
+.verdict-pill.big { font-size: 40px; padding: 12px 30px; }
+.verdict-reason { font-size: 18px; max-width: 760px; margin-top: 16px; color: rgba(255,255,255,.92); }
+
+/* Trend & Halal */
+.halal-card, .trend-card {
+  border: 1px solid var(--gray-2); border-radius: 12px;
+  padding: 18px 22px; margin-bottom: 16px; background: #fff;
+}
+.halal-card { background: var(--gray-1); }
+.halal-row { display: flex; gap: 18px; align-items: center; }
+.halal-pill {
+  display: inline-block; padding: 8px 18px; border-radius: 999px;
+  font-size: 14px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+  white-space: nowrap;
+}
+.halal-summary { margin: 0; flex: 1; color: var(--ink); }
+.callout {
+  margin-top: 14px; padding: 12px 16px; border-radius: 8px;
+  background: #FAD7D7; border-left: 4px solid var(--red);
+  color: var(--red); font-size: 14.5px;
+}
+.trend-text { margin: 0; }
+
+/* Levels chart */
+.chart-wrap {
+  flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center;
+  background: #fff; border: 1px solid var(--gray-2); border-radius: 12px;
+  padding: 16px;
+}
+.chart-wrap svg { width: 100%; height: auto; max-height: 100%; }
+.caption { font-size: 12.5px; color: var(--muted); margin: 12px 0 0; text-align: center; }
+
+/* Indicator dashboard */
+.ind-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+  flex: 1; min-height: 0;
+}
+.ind-card {
+  border: 1px solid var(--gray-2); border-radius: 12px; padding: 12px;
+  background: #fff; display: flex; flex-direction: column;
+  align-items: center; justify-content: flex-start;
+}
+.ind-card svg { width: 100%; height: auto; }
+.ind-note { font-size: 12px; color: var(--muted); margin: 6px 4px 0; text-align: center; }
+.stat-strip {
+  display: flex; gap: 36px; margin-top: 18px; padding: 14px 18px;
+  background: var(--gray-1); border-radius: 10px;
+}
+.stat-strip > div { display: flex; flex-direction: column; }
+.strip-val { font-size: 18px; font-weight: 700; color: var(--navy); }
+
+/* Setup slide */
+.setup-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 28px;
+  flex: 1; min-height: 0; align-items: stretch;
+}
+.setup-table {
+  width: 100%; border-collapse: collapse; font-size: 14px; align-self: start;
+}
+.setup-table th {
+  background: var(--navy); color: #fff; text-align: left; padding: 10px 14px;
+  font-size: 12px; text-transform: uppercase; letter-spacing: .08em;
+}
+.setup-table td { padding: 9px 14px; border-bottom: 1px solid var(--gray-2); }
+.setup-table td:first-child { font-weight: 600; color: var(--navy); width: 40%; }
+.setup-table tr:nth-child(even) td { background: var(--gray-1); }
+.rr-wrap {
+  border: 1px solid var(--gray-2); border-radius: 12px; padding: 12px;
+  display: flex; align-items: center; justify-content: center; background: #fff;
+}
+.rr-wrap svg { width: 100%; height: auto; max-height: 360px; }
+
+/* Summary slide */
+.summary-grid {
+  display: grid; grid-template-columns: 1.2fr 1fr; gap: 28px;
+  flex: 1; min-height: 0;
+}
+.sub { font-size: 13px; color: var(--amber); text-transform: uppercase; letter-spacing: .12em; margin: 12px 0 8px; }
+.catalysts li, .sources li { font-size: 14px; line-height: 1.5; margin: 4px 0; }
+.sources a { color: var(--navy); text-decoration: none; border-bottom: 1px dotted var(--navy); }
+.sources a:hover { color: var(--amber); border-bottom-color: var(--amber); }
+.verdict-card {
+  background: var(--gray-1); border-radius: 12px; padding: 22px; height: 100%;
+  display: flex; flex-direction: column; justify-content: center; align-items: flex-start;
+}
+.verdict-card .verdict-reason { color: var(--ink); font-size: 15px; margin-top: 14px; }
+.disclaimer {
+  margin-top: 18px; font-size: 12.5px; color: var(--muted); font-style: italic;
+}
+
+/* Footer / nav */
+.footer {
+  position: absolute; left: 72px; right: 72px; bottom: 18px;
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 12px; color: var(--muted);
+}
+.title-slide ~ .footer, .footer.title {}
+.nav { display: flex; gap: 8px; align-items: center; }
+.nav button {
+  background: #fff; border: 1px solid var(--gray-3); color: var(--navy);
+  padding: 4px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;
+}
+.nav button:hover { background: var(--gray-1); }
+.progress {
+  position: absolute; left: 0; top: 0; height: 3px; background: var(--amber);
+  width: 0; transition: width .25s ease; z-index: 10;
+}
+.keypress {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 11px; padding: 1px 6px; border: 1px solid var(--gray-3);
+  border-radius: 4px; background: #fff; color: var(--navy);
+}
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+  <div class="progress" id="progress"></div>
+  
+<section class="slide title-slide active">
+  <div class="title-bg"></div>
+  <div class="title-inner">
+    <h3>Swing-Trade Setup</h3>
+    <h1>IREN<span class="title-name"> · IREN Ltd</span></h1>
+    <div class="rule"></div>
+    <div class="title-row">
+      <div class="title-stat">
+        <span class="title-label">As of</span>
+        <span class="title-value">2026-06-15</span>
+      </div>
+      <div class="title-stat">
+        <span class="title-label">Price</span>
+        <span class="title-value">$61.22</span>
+      </div>
+      <div class="title-stat">
+        <span class="title-label">Halal</span>
+        <span class="title-pill" style="background:#FAD7D7;color:#C62828;">Non-compliant</span>
+      </div>
+    </div>
+    <div class="big-verdict">
+      <div class="verdict-pill" style="background:#FAD7D7;color:#C62828;">AVOID</div>
+      <p class="verdict-reason">You already hold this (307 sh @ $48 avg, +28%). On the chart it&#x27;s a high-beta mid-range uptrend - but it fails all four Halal lenses in your prior report, so for your mandate the action is trim/exit + purify gains, not add. Halal non-compliance overrides any technical buy.</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <h3>Trend &amp; Halal flag</h3>
+  <h1>The setup in one read</h1>
+  <div class="rule"></div>
+  <div class="halal-card">
+    <span class="title-label">Halal status</span>
+    <div class="halal-row">
+      <span class="halal-pill" style="background:#FAD7D7;color:#C62828;">Non-compliant</span>
+      <p class="halal-summary">Fails all four lenses: AAOIFI interest income ~6.1% of revenue (&gt;5% cap), PIF Steps 3 &amp; 4 fail (interest income + expense breach 2.5%). Driven by the debt-funded GPU buildout and a large interest-earning cash pile. Bitcoin mining + AI GPU colocation.</p>
+    </div>
+    
+<div class="callout">
+  <strong>Halal-mandate readers:</strong> this trade is not yours to take. The verdict on slide 1 already reflects that, regardless of how the chart looks.
+</div>
+
+  </div>
+  <div class="trend-card">
+    <span class="title-label">Trend read</span>
+    <p class="trend-text">High-beta uptrend, but choppy. IREN ran from the low-$30s in late March to a ~$68 closing high on May 28, then pulled back to ~$51 (June 8) before bouncing to ~$61 today (+2.4%). It now sits mid-range between $51 support and the $67-$71 supply zone, roughly at/above a rising 50DMA. Technically constructive - but this is a Halal-flagged name, so the chart is informational only.</p>
+  </div>
+</section>
+
+<section class="slide">
+  <h3>Key levels</h3>
+  <h1>Where the trader cares about price</h1>
+  <div class="rule"></div>
+  <div class="chart-wrap"><svg viewBox="0 0 900 480" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Key levels chart" style="font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif;"><line x1="60" y1="444.0" x2="580" y2="444.0" stroke="#E7E7E7" stroke-width="0.5" /><text x="52" y="448.0" text-anchor="end" font-size="11" fill="#555555">$36</text><line x1="60" y1="362.4" x2="580" y2="362.4" stroke="#E7E7E7" stroke-width="0.5" /><text x="52" y="366.4" text-anchor="end" font-size="11" fill="#555555">$45</text><line x1="60" y1="280.8" x2="580" y2="280.8" stroke="#E7E7E7" stroke-width="0.5" /><text x="52" y="284.8" text-anchor="end" font-size="11" fill="#555555">$54</text><line x1="60" y1="199.2" x2="580" y2="199.2" stroke="#E7E7E7" stroke-width="0.5" /><text x="52" y="203.2" text-anchor="end" font-size="11" fill="#555555">$63</text><line x1="60" y1="117.6" x2="580" y2="117.6" stroke="#E7E7E7" stroke-width="0.5" /><text x="52" y="121.6" text-anchor="end" font-size="11" fill="#555555">$71</text><line x1="60" y1="36.0" x2="580" y2="36.0" stroke="#E7E7E7" stroke-width="0.5" /><text x="52" y="40.0" text-anchor="end" font-size="11" fill="#555555">$80</text><rect x="60" y="261.3" width="520" height="18.7" fill="#FDF2D4" opacity="0.65" /><rect x="60" y="314.5" width="520" height="6" fill="#F8D7DA" opacity="0.55" /><line x1="60" y1="149.0" x2="580" y2="149.0" stroke="#888888" stroke-width="0.9" stroke-dasharray="3,3" opacity="0.8" /><line x1="60" y1="121.0" x2="580" y2="121.0" stroke="#888888" stroke-width="0.9" stroke-dasharray="3,3" opacity="0.8" /><line x1="60" y1="64.8" x2="580" y2="64.8" stroke="#888888" stroke-width="0.9" stroke-dasharray="3,3" opacity="0.8" /><line x1="60" y1="270.7" x2="580" y2="270.7" stroke="#888888" stroke-width="0.9" stroke-dasharray="3,3" opacity="0.8" /><line x1="60" y1="308.1" x2="580" y2="308.1" stroke="#888888" stroke-width="0.9" stroke-dasharray="3,3" opacity="0.8" /><line x1="60" y1="345.6" x2="580" y2="345.6" stroke="#888888" stroke-width="0.9" stroke-dasharray="3,3" opacity="0.8" /><line x1="60" y1="261.3" x2="580" y2="261.3" stroke="#C69214" stroke-width="1.5" /><line x1="60" y1="429.8" x2="580" y2="429.8" stroke="#888888" stroke-width="1.5" stroke-dasharray="6,3,1,3" /><line x1="60" y1="317.5" x2="580" y2="317.5" stroke="#C62828" stroke-width="1.6" /><line x1="60" y1="64.8" x2="580" y2="64.8" stroke="#2E7D32" stroke-width="1.4" stroke-dasharray="2,4" /><line x1="60" y1="149.0" x2="580" y2="149.0" stroke="#2E7D32" stroke-width="1.6" stroke-dasharray="6,4" /><line x1="60" y1="212.5" x2="580" y2="212.5" stroke="#0B3C5D" stroke-width="2.6" /><rect x="64" y="200.5" width="84" height="22" rx="3" fill="#0B3C5D" /><text x="72" y="216.5" font-size="12" font-weight="700" fill="#fff">$61.22</text><text x="594" y="153.0" font-size="11" font-weight="500" fill="#555555">R  $68.00  <tspan fill="#888888" font-style="italic" font-weight="400">— Late-May swing high</tspan></text><text x="594" y="125.0" font-size="11" font-weight="500" fill="#555555">R  $71.00  <tspan fill="#888888" font-style="italic" font-weight="400">— 13-week high</tspan></text><text x="594" y="68.8" font-size="11" font-weight="500" fill="#555555">R  $77.00  <tspan fill="#888888" font-style="italic" font-weight="400">— 52-week high</tspan></text><path d="M 580 270.7 L 586 270.7 L 590 276.3 L 590 276.3" stroke="#C9C9C9" stroke-width="0.8" fill="none" /><text x="594" y="280.3" font-size="11" font-weight="500" fill="#555555">S  $55.00  <tspan fill="#888888" font-style="italic" font-weight="400">— Recent shelf / ~50DMA</tspan></text><text x="594" y="312.1" font-size="11" font-weight="500" fill="#555555">S  $51.00  <tspan fill="#888888" font-style="italic" font-weight="400">— June 8 swing low</tspan></text><text x="594" y="349.6" font-size="11" font-weight="500" fill="#555555">S  $47.00  <tspan fill="#888888" font-style="italic" font-weight="400">— May pivot / your cost basis area</tspan></text><text x="594" y="265.3" font-size="11" font-weight="600" fill="#C69214">50DMA  $56.00</text><text x="594" y="433.8" font-size="11" font-weight="600" fill="#888888">200DMA  $38.00</text><path d="M 580 317.5 L 586 317.5 L 590 323.1 L 590 323.1" stroke="#C9C9C9" stroke-width="0.8" fill="none" /><text x="594" y="327.1" font-size="11" font-weight="700" fill="#C62828">Stop  $50.00</text><path d="M 580 64.8 L 586 64.8 L 590 79.8 L 590 79.8" stroke="#C9C9C9" stroke-width="0.8" fill="none" /><text x="594" y="83.8" font-size="11" font-weight="700" fill="#2E7D32">T2  $77.00</text><path d="M 580 149.0 L 586 149.0 L 590 164.0 L 590 164.0" stroke="#C9C9C9" stroke-width="0.8" fill="none" /><text x="594" y="168.0" font-size="11" font-weight="700" fill="#2E7D32">T1  $68.00</text><path d="M 580 270.7 L 586 270.7 L 590 291.3 L 590 291.3" stroke="#C9C9C9" stroke-width="0.8" fill="none" /><text x="594" y="295.3" font-size="11" font-weight="700" fill="#C69214">Entry  $54.00–$56.00</text><text x="594" y="216.5" font-size="11" font-weight="800" fill="#0B3C5D">CURRENT</text></svg></div>
+  <p class="caption">Supports · resistances · 50DMA / 200DMA · entry zone (amber) · stop (red) · targets (green) · current price (navy).</p>
+</section>
+
+<section class="slide">
+  <h3>Indicator dashboard</h3>
+  <h1>Momentum, trend, and the earnings clock</h1>
+  <div class="rule"></div>
+  <div class="ind-grid">
+    <div class="ind-card"><svg viewBox="0 0 280 170" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RSI gauge" style="font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif;"><path d="M 30.0 146.0 A 110 110 0 0 0 75.3 57.0" stroke="#DDF1DE" stroke-width="14" fill="none" /><path d="M 75.3 57.0 A 110 110 0 0 0 204.7 57.0" stroke="#E7E7E7" stroke-width="14" fill="none" /><path d="M 204.7 57.0 A 110 110 0 0 0 250.0 146.0" stroke="#FAD7D7" stroke-width="14" fill="none" /><text x="16.0" y="150.0" text-anchor="middle" font-size="10" fill="#555555">0</text><text x="67.1" y="49.7" text-anchor="middle" font-size="10" fill="#555555">30</text><text x="212.9" y="49.7" text-anchor="middle" font-size="10" fill="#555555">70</text><text x="264.0" y="150.0" text-anchor="middle" font-size="10" fill="#555555">100</text><line x1="140.0" y1="146" x2="149.8" y2="42.5" stroke="#0B3C5D" stroke-width="3" stroke-linecap="round" /><circle cx="140.0" cy="146" r="6" fill="#0B3C5D" /><text x="140.0" y="118.0" text-anchor="middle" font-size="28" font-weight="800" fill="#0B3C5D">53</text><text x="140.0" y="138.0" text-anchor="middle" font-size="11" font-weight="600" fill="#555555" letter-spacing="1.2">NEUTRAL</text></svg><p class="ind-note">Mid-range after the bounce; neither overbought nor oversold.</p></div>
+    <div class="ind-card"><svg viewBox="0 0 280 170" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="MACD posture" style="font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif;"><rect x="6" y="6" width="268" height="158" rx="10" fill="#DDF1DE" /><text x="140.0" y="67.0" text-anchor="middle" font-size="13" font-weight="600" fill="#555555" letter-spacing="2">MACD</text><text x="140.0" y="103.0" text-anchor="middle" font-size="32" font-weight="800" fill="#2E7D32">Bullish</text></svg><p class="ind-note">Recovering off the early-June dip; momentum turning back up.</p></div>
+    <div class="ind-card"><svg viewBox="0 0 280 170" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Price vs moving averages" style="font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif;"><text x="14" y="22" font-size="13" font-weight="600" fill="#555555" letter-spacing="2">PRICE vs MA</text><line x1="140" y1="52" x2="140" y2="70" stroke="#C9C9C9" stroke-width="1" /><rect x="40" y="58" width="200" height="6" fill="#E7E7E7" rx="3" /><rect x="140" y="58" width="62.1" height="6" fill="#2E7D32" rx="3" /><text x="14" y="62" font-size="12" fill="#0B3C5D" font-weight="600">50DMA</text><text x="266" y="62" text-anchor="end" font-size="13" font-weight="700" fill="#2E7D32">+9.3%</text><line x1="140" y1="100" x2="140" y2="118" stroke="#C9C9C9" stroke-width="1" /><rect x="40" y="106" width="200" height="6" fill="#E7E7E7" rx="3" /><rect x="140" y="106" width="100.0" height="6" fill="#2E7D32" rx="3" /><text x="14" y="110" font-size="12" fill="#0B3C5D" font-weight="600">200DMA</text><text x="266" y="110" text-anchor="end" font-size="13" font-weight="700" fill="#2E7D32">+61.1%</text></svg></div>
+    <div class="ind-card"><svg viewBox="0 0 280 170" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Earnings window flag" style="font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif;"><rect x="6" y="6" width="268" height="158" rx="10" fill="#DDF1DE" /><text x="140.0" y="38" text-anchor="middle" font-size="13" font-weight="600" fill="#555555" letter-spacing="2">EARNINGS</text><text x="140.0" y="86" text-anchor="middle" font-size="22" font-weight="800" fill="#2E7D32">2026-09-16</text><text x="140.0" y="115" text-anchor="middle" font-size="14" font-weight="700" fill="#2E7D32">OUTSIDE horizon</text><text x="140.0" y="140" text-anchor="middle" font-size="12" fill="#555555">93d away</text></svg></div>
+  </div>
+  <div class="stat-strip">
+    <div><span class="title-label">Beta</span><span class="strip-val">4.2</span></div>
+    <div><span class="title-label">Daily vol</span><span class="strip-val">7.0%</span></div>
+    <div><span class="title-label">Position size</span><span class="strip-val">NONE - fails Halal screen. Not actionable for your mandate.</span></div>
+  </div>
+</section>
+
+<section class="slide">
+  <h3>Trade setup</h3>
+  <h1>Entry, stop, targets, sizing</h1>
+  <div class="rule"></div>
+  <div class="setup-grid">
+    <table class="setup-table">
+      <thead><tr><th>Parameter</th><th>Value</th></tr></thead>
+      <tbody><tr><td>Direction</td><td>Long (technical only)</td></tr><tr><td>Entry A</td><td>$54.00 – $56.00</td></tr><tr><td>Entry B</td><td>Break &gt; $71 on volume (technical only)</td></tr><tr><td>Stop-loss</td><td>$50.00</td></tr><tr><td>Target 1</td><td>$68.00</td></tr><tr><td>Target 2</td><td>$77.00</td></tr><tr><td>R:R (Entry → T1)</td><td>≈ 1 : 2.4</td></tr><tr><td>R:R (Entry → T2)</td><td>≈ 1 : 4.2</td></tr><tr><td>Position sizing</td><td>NONE - fails Halal screen. Not actionable for your mandate.</td></tr><tr><td>Invalidation</td><td>Halal: already invalid (non-compliant). Technical: daily close &lt; $50.</td></tr></tbody>
+    </table>
+    <div class="rr-wrap"><svg viewBox="0 0 520 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Risk-reward bar" style="font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif;"><rect x="228.0" y="50.0" width="64" height="211.9" fill="#5DA661" opacity="0.55" rx="6" /><text x="306.0" y="68.0" font-size="13" font-weight="700" fill="#2E7D32">T2 $77.00  ·  R:R 1:4.4</text><rect x="228.0" y="136.7" width="64" height="125.2" fill="#2E7D32" opacity="0.95" rx="6" /><text x="306.0" y="154.7" font-size="13" font-weight="700" fill="#2E7D32">T1 $68.00  ·  R:R 1:2.6</text><rect x="228.0" y="261.9" width="64" height="48.1" fill="#C62828" opacity="0.9" rx="6" /><text x="306.0" y="304.0" font-size="13" font-weight="700" fill="#C62828">Stop $50.00  ·  Risk $5.00</text><line x1="218.0" y1="261.9" x2="302.0" y2="261.9" stroke="#0B3C5D" stroke-width="2.4" /><text x="214.0" y="265.9" text-anchor="end" font-size="13" font-weight="700" fill="#0B3C5D">Entry  $54.00–$56.00</text></svg></div>
+  </div>
+</section>
+
+<section class="slide">
+  <h3>Catalysts &amp; verdict</h3>
+  <h1>What to watch — and the call</h1>
+  <div class="rule"></div>
+  <div class="summary-grid">
+    <div>
+      <h2 class="sub">Catalysts inside horizon</h2>
+      <ul class="catalysts"><li>Bitcoin price swings - direct driver of mining revenue (high correlation)</li><li>AI/GPU colocation contract announcements &amp; data-center capacity ramp</li><li>Q-earnings ~Sept 16, 2026 - OUTSIDE the 2-8 week swing window</li><li>Halal: interest income/expense from debt-funded buildout keeps it non-compliant</li></ul>
+      <h2 class="sub">Sources</h2>
+      <ul class="sources"><li><a href="https://www.tipranks.com/stocks/iren/earnings" target="_blank" rel="noopener">TipRanks - IREN earnings</a></li><li><a href="computer://Investment/research-reports/IREN_research_report.html" target="_blank" rel="noopener">Your prior research report - IREN_research_report.html</a></li></ul>
+    </div>
+    <div>
+      <div class="verdict-card">
+        <span class="title-label">Verdict</span>
+        <div class="verdict-pill big" style="background:#FAD7D7;color:#C62828;">AVOID</div>
+        <p class="verdict-reason">You already hold this (307 sh @ $48 avg, +28%). On the chart it&#x27;s a high-beta mid-range uptrend - but it fails all four Halal lenses in your prior report, so for your mandate the action is trim/exit + purify gains, not add. Halal non-compliance overrides any technical buy.</p>
+      </div>
+    </div>
+  </div>
+  <p class="disclaimer">Technical read, not financial advice — do your own due diligence.</p>
+</section>
+
+  <div class="footer">
+    <div>IREN swing setup · 2026-06-15</div>
+    <div class="nav">
+      <button id="prev">‹ Prev</button>
+      <span id="counter">1 / 6</span>
+      <button id="next">Next ›</button>
+      <span style="margin-left: 12px;">Use <span class="keypress">←</span> <span class="keypress">→</span> to navigate</span>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const counter = document.getElementById('counter');
+  const progress = document.getElementById('progress');
+  let i = 0;
+  function show(n){
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach((s, idx) => s.classList.toggle('active', idx === i));
+    counter.textContent = (i + 1) + ' / ' + slides.length;
+    progress.style.width = ((i + 1) / slides.length * 100) + '%';
+    slides[i].scrollTop = 0;
+  }
+  document.getElementById('prev').onclick = () => show(i - 1);
+  document.getElementById('next').onclick = () => show(i + 1);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); show(i + 1); }
+    if (e.key === 'ArrowLeft'  || e.key === 'PageUp')                   { e.preventDefault(); show(i - 1); }
+    if (e.key === 'Home') show(0);
+    if (e.key === 'End')  show(slides.length - 1);
+  });
+  show(0);
+})();
+</script>
+</body>
+</html>

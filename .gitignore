@@ -1,0 +1,19 @@
+# Playwright MCP screenshots (any depth)
+.playwright-mcp/
+
+# Remember plugin session memory
+.remember/
+
+# Sub-project with its own lifecycle
+halal-investment-site/
+
+# Generated per-ticker deliverables (curated samples live in examples/)
+/research-reports/
+/swing-setups/
+
+# Per-user plugin settings and local Claude config
+.claude/*.local.md
+.claude/settings.local.json
+
+# Python bytecode
+__pycache__/

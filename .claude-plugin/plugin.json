@@ -1,0 +1,17 @@
+{
+  "name": "halal-investing",
+  "version": "0.1.0",
+  "description": "Halal-conscious equity & crypto research reports and swing-trade setup decks, with a PIF 4-step + AAOIFI Shariah screening agent.",
+  "author": {
+    "name": "BarhoumiDev"
+  },
+  "license": "UNLICENSED",
+  "keywords": [
+    "investing",
+    "shariah",
+    "halal",
+    "aaoifi",
+    "research",
+    "swing-trading"
+  ]
+}

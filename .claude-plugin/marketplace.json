@@ -1,0 +1,14 @@
+{
+  "name": "barhoumi-dev",
+  "description": "Claude Code plugins by barhoumi-dev.",
+  "owner": {
+    "name": "BarhoumiDev"
+  },
+  "plugins": [
+    {
+      "name": "halal-investing",
+      "source": "./",
+      "description": "Halal-conscious research reports, swing-trade decks, and a Shariah screening agent."
+    }
+  ]
+}

@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IREN Limited (IREN)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap">
+  <style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── Verdant light (default) ── */
+:root {
+  --primary:        #0f3d2e;
+  --primary-fg:     #faf6eb;
+  --accent:         #b8835a;
+
+  --halal:          #2d6b4f;
+  --halal-bg:       rgba(45,107,79,0.08);
+  --haram:          #b54a3a;
+  --haram-bg:       rgba(181,74,58,0.08);
+  --review:         #b8835a;
+  --review-bg:      rgba(184,131,90,0.10);
+
+  --bg:             #f7f4ec;
+  --bg-soft:        #efeadd;
+  --panel:          #fffdf7;
+  --panel-2:        #faf6eb;
+
+  --fg:             #15211b;
+  --fg-soft:        #3c4a40;
+  --fg-muted:       #7a7368;
+  --fg-faint:       #a89e8c;
+
+  --border:         rgba(15,33,27,0.10);
+  --border-strong:  rgba(15,33,27,0.18);
+  --grid-line:      rgba(15,33,27,0.05);
+
+  --shadow-sm: 0 1px 2px rgba(15,33,27,.04), 0 1px 0 rgba(255,255,255,.6) inset;
+  --shadow-md: 0 1px 3px rgba(15,33,27,.06), 0 8px 24px rgba(15,33,27,.05);
+
+  --font-display: "Instrument Serif","Source Serif 4",Georgia,serif;
+  --font-body:    "Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-mono:    "Geist Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --display-tracking: -0.01em;
+
+  --sidebar-w: 220px;
+  --content-max: 960px;
+}
+
+/* ── Verdant dark ── */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --primary:       #d8b893;
+    --primary-fg:    #0e1612;
+    --accent:        #d8b893;
+
+    --bg:            #0e1612;
+    --bg-soft:       #131c17;
+    --panel:         #16201a;
+    --panel-2:       #1b261f;
+    --fg:            #ece6d4;
+    --fg-soft:       #c9c2af;
+    --fg-muted:      #8c8676;
+    --fg-faint:      #5e5b50;
+    --border:        rgba(236,230,212,0.08);
+    --border-strong: rgba(236,230,212,0.16);
+    --grid-line:     rgba(236,230,212,0.04);
+    --shadow-sm:     0 1px 2px rgba(0,0,0,.4);
+    --shadow-md:     0 1px 3px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.3);
+    --halal:         #76c79b;
+    --halal-bg:      rgba(118,199,155,0.10);
+    --haram:         #ec8474;
+    --haram-bg:      rgba(236,132,116,0.10);
+    --review:        #d8b893;
+    --review-bg:     rgba(216,184,147,0.10);
+  }
+}
+
+html { scroll-behavior: smooth; font-size: 15px; }
+body {
+  font-family: var(--font-body);
+  color: var(--fg);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  line-height: 1.55;
+}
+
+/* ── App shell ── */
+.report-app {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr;
+  min-height: 100vh;
+}
+@media (max-width: 800px) {
+  .report-app { grid-template-columns: 1fr; }
+  .report-sidebar { display: none; }
+}
+
+/* ── Sidebar ── */
+.report-sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  padding: 22px 14px 24px;
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+}
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+  padding: 0 4px;
+}
+.sidebar-logomark { flex-shrink: 0; }
+.sidebar-wordmark {
+  font-family: var(--font-display);
+  font-size: 17px;
+  letter-spacing: var(--display-tracking);
+  line-height: 1;
+  color: var(--fg);
+  font-weight: 400;
+}
+.sidebar-wordmark em { font-style: normal; color: var(--accent); }
+.toc-label {
+  font-size: 10px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+  font-weight: 600;
+  padding: 0 10px 8px;
+}
+.toc-item {
+  display: block;
+  padding: 7px 10px;
+  border-radius: 8px;
+  color: var(--fg-muted);
+  font-size: 12.5px;
+  font-weight: 500;
+  text-decoration: none;
+  border: 0;
+  border-left: 2px solid transparent;
+  transition: background .15s, color .15s, border-color .15s;
+  margin-bottom: 1px;
+  cursor: pointer;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+}
+.toc-item:hover { background: var(--bg-soft); color: var(--fg); }
+.toc-item.active {
+  background: var(--bg-soft);
+  color: var(--primary);
+  border-left-color: var(--accent);
+  font-weight: 600;
+}
+
+/* ── Main ── */
+.report-main {
+  min-width: 0;
+  padding: 48px 56px 80px;
+}
+@media (max-width: 960px) { .report-main { padding: 32px 24px 64px; } }
+@media (max-width: 600px) { .report-main { padding: 20px 16px 48px; } }
+.report-body { max-width: var(--content-max); margin: 0 auto; }
+
+/* ── Header ── */
+.report-header {
+  padding-bottom: 28px;
+  margin-bottom: 0;
+  border-bottom: 2px solid var(--accent);
+}
+.header-badges {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.ticker-badge {
+  padding: 5px 11px;
+  background: var(--primary);
+  color: var(--primary-fg);
+  border-radius: 7px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .02em;
+}
+.report-title {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 4vw, 44px);
+  line-height: 1.08;
+  letter-spacing: var(--display-tracking);
+  color: var(--primary);
+  margin-bottom: 10px;
+  font-weight: 400;
+}
+.report-subtitle {
+  font-size: 13px;
+  color: var(--fg-muted);
+  font-family: var(--font-mono);
+}
+
+/* ── Sections ── */
+.section-block { padding-top: 44px; }
+.section-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 11px;
+  margin-bottom: 18px;
+}
+.section-num {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-faint);
+  min-width: 20px;
+}
+.section-title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  line-height: 1.15;
+  letter-spacing: var(--display-tracking);
+  color: var(--primary);
+  font-weight: 400;
+}
+.subsection-heading {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--fg);
+  margin-top: 22px;
+  margin-bottom: 10px;
+  letter-spacing: -.01em;
+}
+.section-divider {
+  height: 1px;
+  background: var(--border);
+  margin-top: 44px;
+}
+
+/* ── Prose ── */
+.prose p {
+  color: var(--fg-soft);
+  line-height: 1.65;
+  font-size: 14px;
+  margin-bottom: 11px;
+  max-width: 70ch;
+}
+.prose ul { padding-left: 20px; margin-bottom: 12px; }
+.prose li {
+  color: var(--fg-soft);
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 4px;
+}
+
+/* ── Stat cards ── */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill,minmax(148px,1fr));
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.stat-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 16px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: border-color .15s, box-shadow .15s;
+}
+.stat-label {
+  font-size: 10px;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  font-weight: 600;
+  font-family: var(--font-mono);
+}
+.stat-value {
+  font-family: var(--font-display);
+  font-size: 22px;
+  line-height: 1;
+  letter-spacing: var(--display-tracking);
+  color: var(--fg);
+  font-weight: 400;
+  font-feature-settings: "lnum";
+}
+
+/* ── Badges ── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  border: 1px solid transparent;
+}
+.badge-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.badge-halal  { color: var(--halal);  background: var(--halal-bg);  border-color: color-mix(in oklab,var(--halal) 28%,transparent); }
+.badge-haram  { color: var(--haram);  background: var(--haram-bg);  border-color: color-mix(in oklab,var(--haram) 28%,transparent); }
+.badge-review { color: var(--review); background: var(--review-bg); border-color: color-mix(in oklab,var(--review) 28%,transparent); }
+.badge-pass   { color: var(--halal);  background: var(--halal-bg);  border-color: color-mix(in oklab,var(--halal) 28%,transparent); }
+.badge-fail   { color: var(--haram);  background: var(--haram-bg);  border-color: color-mix(in oklab,var(--haram) 28%,transparent); }
+
+/* ── Card ── */
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 14px;
+  transition: border-color .15s, box-shadow .15s;
+}
+.card-inset { padding: 0 !important; overflow: hidden; }
+
+/* ── Tables ── */
+.tbl-wrap {
+  overflow-x: auto;
+  margin-bottom: 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+.tbl {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+  background: var(--panel);
+}
+.tbl thead tr { background: var(--primary); color: var(--primary-fg); }
+.tbl th {
+  padding: 9px 11px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: .04em;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+}
+.tbl th:first-child { text-align: left; padding-left: 14px; }
+.tbl td {
+  padding: 8px 11px;
+  border-bottom: 1px solid var(--border);
+  color: var(--fg-soft);
+  vertical-align: middle;
+  text-align: center;
+}
+.tbl td:first-child { text-align: left; padding-left: 14px; font-weight: 500; color: var(--fg); }
+.tbl tbody tr:last-child td { border-bottom: 0; }
+.tbl tbody tr:nth-child(even) td { background: var(--bg-soft); }
+.tbl tbody tr.hl td { background: color-mix(in oklab,var(--accent) 10%,transparent) !important; font-weight: 600; }
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+/* ── Compliance rows ── */
+.compliance-card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; box-shadow: var(--shadow-sm); margin-bottom: 14px; }
+.compliance-row {
+  display: flex;
+  align-items: center;
+  padding: 13px 18px;
+  border-bottom: 1px solid var(--border);
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.compliance-row:last-child { border-bottom: 0; }
+.compliance-info { flex: 1; min-width: 160px; }
+.compliance-name { font-size: 13px; font-weight: 500; color: var(--fg); margin-bottom: 2px; }
+.compliance-threshold { font-size: 11px; color: var(--fg-muted); font-family: var(--font-mono); }
+.compliance-bar { margin-top: 7px; height: 4px; background: var(--bg-soft); border-radius: 2px; overflow: hidden; }
+.compliance-bar-fill { height: 100%; border-radius: 2px; }
+.bar-pass { background: var(--halal); }
+.bar-fail { background: var(--haram); }
+.compliance-value { font-family: var(--font-mono); font-size: 16px; font-weight: 600; color: var(--fg); min-width: 65px; text-align: right; }
+.compliance-verdict { min-width: 58px; text-align: right; }
+
+/* ── Source note / Disclaimer ── */
+.source-note { font-size: 11px; color: var(--fg-faint); font-style: italic; margin-bottom: 14px; }
+.disclaimer-block {
+  margin-top: 52px;
+  padding: 16px 20px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font-size: 12px;
+  color: var(--fg-muted);
+  line-height: 1.6;
+}
+.disclaimer-block strong { color: var(--fg); }
+
+/* ── Chart containers ── */
+.chart-wrap { margin-bottom: 16px; background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 18px; box-shadow: var(--shadow-sm); }
+
+/* ── Print ── */
+@media print {
+  .report-sidebar { display: none !important; }
+  .report-app { grid-template-columns: 1fr !important; }
+  .report-main { padding: 0 !important; }
+  .section-block { page-break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+<div class="report-app">
+
+  <aside class="report-sidebar">
+    <div class="sidebar-logo">
+      <span class="sidebar-logomark">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="28" height="28" rx="7" fill="var(--primary)"/>
+          <path d="M8 7v14M20 7v14M8 14h8" stroke="var(--primary-fg)" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="20" cy="14" r="3.2" fill="none" stroke="var(--primary-fg)" stroke-width="1.6"/>
+          <circle cx="21" cy="13.4" r="2.6" fill="var(--primary)"/>
+        </svg>
+      </span>
+      <span class="sidebar-wordmark">Halal<em>Invest</em></span>
+    </div>
+    <div class="toc-label">Contents</div>
+    <a class="toc-item" data-target="s-1-snapshot" href="#s-1-snapshot">Snapshot</a>
+    <a class="toc-item" data-target="s-2-business-overview" href="#s-2-business-overview">Business Overview</a>
+    <a class="toc-item" data-target="s-3-shariah-compliance" href="#s-3-shariah-compliance">Shariah Compliance</a>
+    <a class="toc-item" data-target="s-4-financial-fundamentals" href="#s-4-financial-fundamentals">Financial Fundamentals</a>
+    <a class="toc-item" data-target="s-5-valuation" href="#s-5-valuation">Valuation</a>
+    <a class="toc-item" data-target="s-6-analyst-coverage" href="#s-6-analyst-coverage">Analyst Coverage</a>
+    <a class="toc-item" data-target="s-7-technical-analysis" href="#s-7-technical-analysis">Technical Analysis</a>
+    <a class="toc-item" data-target="s-8-catalysts-risks" href="#s-8-catalysts-risks">Catalysts &amp; Risks</a>
+    <a class="toc-item" data-target="s-9-deep-dive-capital-structure-dilution" href="#s-9-deep-dive-capital-structure-dilution">Deep-Dive: Capital Structure &amp; Dilution</a>
+    <a class="toc-item" data-target="s-10-summary-thesis" href="#s-10-summary-thesis">Summary &amp; Thesis</a>
+  </aside>
+
+  <main class="report-main">
+    <div class="report-body">
+
+      <header class="report-header">
+        <div class="header-badges">
+          <div class="ticker-badge">IREN</div>
+          <span class="badge badge-haram"><span class="badge-dot"></span>Haram</span>
+        </div>
+        <h1 class="report-title">IREN Limited (IREN)</h1>
+        <p class="report-subtitle">As of 2026-06-09 close · NASDAQ</p>
+      </header>
+
+      <section class="section-block" id="s-1-snapshot">
+<div class="section-heading"><span class="section-num">1.</span><h2 class="section-title">Snapshot</h2></div>
+
+<div class="stat-grid"><div class="stat-card"><div class="stat-label">Price</div><div class="stat-value">$54.02</div></div><div class="stat-card"><div class="stat-label">Market Cap</div><div class="stat-value">$19.31B</div></div><div class="stat-card"><div class="stat-label">Shares Out</div><div class="stat-value">357.4M</div></div><div class="stat-card"><div class="stat-label">52W High</div><div class="stat-value">$76.87</div></div><div class="stat-card"><div class="stat-label">52W Low</div><div class="stat-value">$9.52</div></div><div class="stat-card"><div class="stat-label">Div Yield (TTM)</div><div class="stat-value">n/a</div></div><div class="stat-card"><div class="stat-label">Beta</div><div class="stat-value">4.23</div></div><div class="stat-card"><div class="stat-label">Next Earnings</div><div class="stat-value">~Aug 2026 (FY Q4)</div></div><div class="stat-card"><div class="stat-label">Sector / Industry</div><div class="stat-value">Data Center Infrastructure / Bitcoin Mining &amp; AI Cloud</div></div></div>
+
+<p class="source-note">Source: stockanalysis.com/stocks/iren/, close 2026-06-09. Listed sector classification on screeners is &#x27;Financials / Capital Markets&#x27; (legacy of the mining listing); operationally IREN is a data-center infrastructure company.</p>
+
+</section>
+<div class="section-divider"></div>
+<section class="section-block" id="s-2-business-overview">
+<div class="section-heading"><span class="section-num">2.</span><h2 class="section-title">Business Overview</h2></div>
+
+<div class="prose"><p>IREN (formerly Iris Energy) is a vertically integrated data-center operator headquartered in Sydney, with its main operating footprint in Childress, Texas, plus sites in British Columbia and a newly announced 800MW campus in Bundey, South Australia. The company owns its land, grid connections, electrical infrastructure and buildings, and monetizes that power capacity through two businesses: Bitcoin mining (one of the largest listed self-mining fleets) and an AI cloud / GPU colocation business that has become the growth engine.</p><p>The pivotal development is the ~$9.7B multi-year AI cloud contract with Microsoft announced in late 2025, which IREN is servicing with NVIDIA Blackwell-generation GPUs. To fund delivery, IREN closed a $3.65B investment-grade GPU financing facility on 2026-06-01 and signed a ~$1.6B purchase agreement with Dell for air-cooled Blackwell systems (2026-05-26). Management targets ~$4.4B of annualized run-rate revenue (ARR) from the Childress Blackwell deployment alone.</p><p>Revenue today is still majority Bitcoin mining, transitioning rapidly toward contracted AI cloud revenue. The moat is cheap contracted renewable-heavy power, owned grid interconnects, and speed of energization — scarce inputs in the post-2025 AI buildout. Co-founders Daniel and William Roberts run the company; insider ownership is meaningful for a company that has diluted heavily (shares out +52% YoY).</p></div>
+
+<h3 class="subsection-heading">Segment mix (FY Q3 2026, quarter ended 2026-03-31)</h3>
+
+<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Segment</th><th>Revenue role</th><th>Direction</th><th>Notes</th></tr></thead><tbody><tr><td>Bitcoin mining</td><td>Majority of current revenue</td><td>Flat / cash-cow</td><td>~50 EH/s self-mining; revenue tracks BTC price and network difficulty</td></tr><tr><td>AI Cloud / GPU services</td><td>Fast-growing minority</td><td>Ramping hard</td><td>Microsoft contract + Dell Blackwell fleet; targeted ~$4.4B ARR at Childress</td></tr><tr><td>Power / land bank</td><td>Optionality</td><td>Expanding</td><td>Multi-GW pipeline incl. 800MW South Australia campus announced 2026-06-03</td></tr></tbody></table></div>
+
+<h3 class="subsection-heading">Recent strategic developments (last 12 months)</h3>
+
+<div class="prose"><ul><li>2026-06-03 — Announced first Australian data-center campus: 800MW in Bundey, South Australia (transmission connection agreement signed).</li><li>2026-06-01 — Closed $3.65B investment-grade GPU financing facility for AI Cloud expansion.</li><li>2026-05-26 — ~$1.6B purchase agreement with Dell for NVIDIA air-cooled Blackwell systems; $4.4B ARR target at Childress.</li><li>Late 2025 — ~$9.7B AI cloud contract with Microsoft (the company&#x27;s anchor customer).</li><li>FY Q3 2026 (Mar) — Quarterly revenue $144.8M; heavy depreciation and financing costs swung GAAP earnings to a loss.</li></ul></div>
+
+<p class="source-note">Source: GlobeNewswire releases 2026-05-26 / 2026-06-01 / 2026-06-03; Reuters 2026-05-26; stockanalysis.com quarterly financials.</p>
+
+</section>
+<div class="section-divider"></div>
+<section class="section-block" id="s-3-shariah-compliance">
+<div class="section-heading"><span class="section-num">3.</span><h2 class="section-title">Shariah Compliance</h2></div>
+
+<h3 class="subsection-heading">3a. Four-lens summary</h3>
+
+<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Lens</th><th>Rating</th><th>Key driver</th></tr></thead><tbody><tr><td>Zoya</td><td>Non-compliant</td><td>Fails AAOIFI screen (interest exposure)</td></tr><tr><td>Musaffa</td><td>Not Halal</td><td>Exceeds permissible thresholds — interest-bearing debt / non-permissible income</td></tr><tr><td>AAOIFI (manual calc)</td><td>FAIL</td><td>Interest income 6.1% of TTM revenue — over the 5% non-permissible income cap</td></tr><tr><td>PIF 4-step</td><td>UNCOMFORTABLE</td><td>Steps 3 AND 4 fail — interest income and interest expense both breach 2.5% in multiple quarters</td></tr><tr><td>Overall assessment</td><td>NOT SHARIAH COMPLIANT</td><td>All four lenses fail; this is unambiguous, driven by the debt-funded GPU buildout and large interest-earning cash pile</td></tr></tbody></table></div>
+
+<h3 class="subsection-heading">3b. AAOIFI financial ratio screen</h3>
+
+<div class="compliance-card">
+<div class="compliance-row"><div class="compliance-info"><div class="compliance-name">Non-permissible revenue / Total revenue</div><div class="compliance-threshold">Threshold: &lt; 5%</div><div class="compliance-bar"><div class="compliance-bar-fill bar-fail" style="width:100.0%"></div></div></div><div class="compliance-value mono">6.1%</div><div class="compliance-verdict"><span class="badge badge-fail">FAIL</span></div></div>
+<div class="compliance-row"><div class="compliance-info"><div class="compliance-name">Interest-bearing debt / Market Cap</div><div class="compliance-threshold">Threshold: &lt; 30%</div><div class="compliance-bar"><div class="compliance-bar-fill bar-pass" style="width:68.3%"></div></div></div><div class="compliance-value mono">20.5%</div><div class="compliance-verdict"><span class="badge badge-pass">PASS</span></div></div>
+<div class="compliance-row"><div class="compliance-info"><div class="compliance-name">Interest-bearing securities / Market Cap</div><div class="compliance-threshold">Threshold: &lt; 30%</div><div class="compliance-bar"><div class="compliance-bar-fill bar-pass" style="width:41.7%"></div></div></div><div class="compliance-value mono">12.5%</div><div class="compliance-verdict"><span class="badge badge-pass">PASS</span></div></div>
+<div class="compliance-row"><div class="compliance-info"><div class="compliance-name">Accounts Receivable / Market Cap</div><div class="compliance-threshold">Threshold: &lt; 49%</div><div class="compliance-bar"><div class="compliance-bar-fill bar-pass" style="width:1.2%"></div></div></div><div class="compliance-value mono">0.6%</div><div class="compliance-verdict"><span class="badge badge-pass">PASS</span></div></div>
+</div>
+
+<div class="prose"><p>Inputs (TTM to 2026-03-31, market cap at 2026-06-09): total revenue $757.1M; interest income $46.4M (treated as non-permissible income → 6.1%); total debt $3,965M vs market cap $19,310M → 20.5%; cash &amp; equivalents $2,213M plus long-term investments $192M treated conservatively as interest-bearing → 12.5%; trade receivables $114.8M → 0.6%. The screen fails on ratio 1: interest income alone exceeds the 5% non-permissible income ceiling. Note the failure is on the income test, not the leverage test — the $3.97B debt stack still passes 30% because the market cap has inflated to $19B.</p></div>
+
+<h3 class="subsection-heading">3c. PIF 4-step screen</h3>
+
+<div class="prose"><p>Step 1 — Core business. Bitcoin mining and AI cloud computing are themselves permissible activities under the user&#x27;s standard (no excluded industry below is the core business).</p></div>
+
+<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Excluded Industry</th><th>Exposure?</th><th>Notes</th></tr></thead><tbody><tr><td>Alcohol</td><td>N</td><td>—</td></tr><tr><td>Tobacco</td><td>N</td><td>—</td></tr><tr><td>Cannabis</td><td>N</td><td>—</td></tr><tr><td>Pork products</td><td>N</td><td>—</td></tr><tr class="hl"><td>Conventional financial services</td><td>Partial</td><td>No lending business, but P&amp;L now carries material interest income/expense from the financing structure (captured quantitatively in Steps 3–4)</td></tr><tr><td>Defense / weapons</td><td>N</td><td>—</td></tr><tr><td>Gambling / casinos</td><td>N</td><td>—</td></tr><tr><td>Music</td><td>N</td><td>—</td></tr><tr><td>Hotels</td><td>N</td><td>—</td></tr><tr><td>Cinema</td><td>N</td><td>—</td></tr><tr><td>Adult entertainment</td><td>N</td><td>—</td></tr><tr><td>Online dating</td><td>N</td><td>—</td></tr></tbody></table></div>
+
+<div class="prose"><p>Step 2 — Israel presence / human rights. No Israeli operations, offices, or JVs disclosed in IREN&#x27;s filings or sustainability reporting; operating footprint is US (Texas), Canada (BC) and Australia. News search surfaced no HRW/Amnesty/BDS flags. The anchor customer (Microsoft) has its own Israel-related controversies, but the PIF screen as applied here tests the company itself. Step 2: PASS.</p><p>Step 3 — Interest income ≤ 2.5% of revenue, four consecutive quarters (from quarterly statements via stockanalysis.com/Fiscal.ai, 10-Q filings on EDGAR CIK 1878848):</p></div>
+
+<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Quarter</th><th>Interest Income</th><th>Total Revenue</th><th>Ratio</th><th>Pass?</th></tr></thead><tbody><tr><td>FQ4 2025 (Jun &#x27;25)</td><td>$1.70M</td><td>$187.3M</td><td>0.9%</td><td><span class="badge badge-pass">✓ PASS</span></td></tr><tr class="hl"><td>FQ1 2026 (Sep &#x27;25)</td><td>$7.13M</td><td>$240.3M</td><td>3.0%</td><td><span class="badge badge-fail">✗ FAIL</span></td></tr><tr class="hl"><td>FQ2 2026 (Dec &#x27;25)</td><td>$15.78M</td><td>$184.7M</td><td>8.5%</td><td><span class="badge badge-fail">✗ FAIL</span></td></tr><tr class="hl"><td>FQ3 2026 (Mar &#x27;26)</td><td>$21.80M</td><td>$144.8M</td><td>15.1%</td><td><span class="badge badge-fail">✗ FAIL</span></td></tr></tbody></table></div>
+
+<div class="prose"><p>Step 4 — Interest expense ≤ 2.5% of total expenses, four consecutive quarters (total expenses = cost of revenue + operating expenses + interest expense):</p></div>
+
+<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Quarter</th><th>Interest Expense</th><th>Total Expenses</th><th>Ratio</th><th>Pass?</th></tr></thead><tbody><tr class="hl"><td>FQ4 2025 (Jun &#x27;25)</td><td>$5.18M</td><td>$179.7M</td><td>2.9%</td><td><span class="badge badge-fail">✗ FAIL</span></td></tr><tr class="hl"><td>FQ1 2026 (Sep &#x27;25)</td><td>$9.28M</td><td>$333.6M</td><td>2.8%</td><td><span class="badge badge-fail">✗ FAIL</span></td></tr><tr class="hl"><td>FQ2 2026 (Dec &#x27;25)</td><td>$10.67M</td><td>$315.4M</td><td>3.4%</td><td><span class="badge badge-fail">✗ FAIL</span></td></tr><tr class="hl"><td>FQ3 2026 (Mar &#x27;26)</td><td>$14.84M</td><td>$403.3M</td><td>3.7%</td><td><span class="badge badge-fail">✗ FAIL</span></td></tr></tbody></table></div>
+
+<div class="prose"><p>Rating: UNCOMFORTABLE. Steps 3 and 4 both fail, and the trend is worsening as the $2.2B cash pile earns interest while the $3.65B GPU facility accrues interest expense. The &#x27;company in transition&#x27; exception is not invoked: IREN is a revenue-generating company whose financing structure is a deliberate, persistent choice, not a pre-commercial ramp artifact.</p></div>
+
+<h3 class="subsection-heading">3d. Purification</h3>
+
+<div class="prose"><p>Not applicable as an ongoing holding adjustment — the name fails compliance outright. For an investor exiting: TTM interest income of $46.4M over 357.4M shares ≈ $0.13/share of purification on the held period&#x27;s attributable interest income.</p></div>
+
+</section>
+<div class="section-divider"></div>
+<section class="section-block" id="s-4-financial-fundamentals">
+<div class="section-heading"><span class="section-num">4.</span><h2 class="section-title">Financial Fundamentals</h2></div>
+
+<div class="chart-wrap"><svg viewBox="0 0 620 270" style="width:100%;height:auto;display:block" xmlns="http://www.w3.org/2000/svg">
+  <line x1="54" y1="38.0" x2="604" y2="38.0" stroke="var(--grid-line)" stroke-width="1"/>
+  <text x="49" y="42.0" text-anchor="end" font-size="9.5" fill="var(--fg-faint)" font-family="var(--font-mono)">0.9</text>
+  <line x1="54" y1="86.0" x2="604" y2="86.0" stroke="var(--grid-line)" stroke-width="1"/>
+  <text x="49" y="90.0" text-anchor="end" font-size="9.5" fill="var(--fg-faint)" font-family="var(--font-mono)">0.7</text>
+  <line x1="54" y1="134.0" x2="604" y2="134.0" stroke="var(--grid-line)" stroke-width="1"/>
+  <text x="49" y="138.0" text-anchor="end" font-size="9.5" fill="var(--fg-faint)" font-family="var(--font-mono)">0.4</text>
+  <line x1="54" y1="182.0" x2="604" y2="182.0" stroke="var(--grid-line)" stroke-width="1"/>
+  <text x="49" y="186.0" text-anchor="end" font-size="9.5" fill="var(--fg-faint)" font-family="var(--font-mono)">0.2</text>
+  <line x1="54" y1="230.0" x2="604" y2="230.0" stroke="var(--grid-line)" stroke-width="1"/>
+  <text x="49" y="234.0" text-anchor="end" font-size="9.5" fill="var(--fg-faint)" font-family="var(--font-mono)">0.0</text>
+  <rect x="70.5" y="213.7" width="41.2" height="16.3" fill="#0f3d2e" rx="2" opacity="0.88"/>
+  <rect x="118.6" y="228.0" width="41.2" height="2.0" fill="#b8835a" rx="2" opacity="0.90"/>
+  <text x="115.2" y="246" text-anchor="middle" font-size="10.5" fill="var(--fg-muted)" font-family="var(--font-mono)">FY23</text>
+  <rect x="208.0" y="189.8" width="41.2" height="40.2" fill="#0f3d2e" rx="2" opacity="0.88"/>
+  <rect x="256.1" y="228.0" width="41.2" height="2.0" fill="#b8835a" rx="2" opacity="0.90"/>
+  <text x="252.7" y="246" text-anchor="middle" font-size="10.5" fill="var(--fg-muted)" font-family="var(--font-mono)">FY24</text>
+  <rect x="345.5" y="122.3" width="41.2" height="107.7" fill="#0f3d2e" rx="2" opacity="0.88"/>
+  <rect x="393.6" y="211.3" width="41.2" height="18.7" fill="#b8835a" rx="2" opacity="0.90"/>
+  <text x="390.2" y="246" text-anchor="middle" font-size="10.5" fill="var(--fg-muted)" font-family="var(--font-mono)">FY25</text>
+  <rect x="483.0" y="67.3" width="41.2" height="162.7" fill="#0f3d2e" rx="2" opacity="0.88"/>
+  <rect x="531.1" y="196.0" width="41.2" height="34.0" fill="#b8835a" rx="2" opacity="0.90"/>
+  <text x="527.7" y="246" text-anchor="middle" font-size="10.5" fill="var(--fg-muted)" font-family="var(--font-mono)">TTM Mar&#x27;26</text>
+  <line x1="54" y1="230" x2="604" y2="230" stroke="var(--border-strong)" stroke-width="1"/>
+  <rect x="54" y="16" width="11" height="9" fill="#0f3d2e" rx="2" opacity="0.88"/>
+  <text x="69" y="24" font-size="10" fill="var(--fg-muted)" font-family="var(--font-body)">Revenue</text>
+  <rect x="130" y="16" width="11" height="9" fill="#b8835a" rx="2"/>
+  <text x="145" y="24" font-size="10" fill="var(--fg-muted)" font-family="var(--font-body)">NPAT</text>
+  <text x="54" y="13" font-size="11.5" font-weight="600" fill="#0f3d2e" font-family="var(--font-body)">Revenue &amp; Net Income ($B) — fiscal year ends June</text>
+</svg></div>
+
+<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Line</th><th>FY2023</th><th>FY2024</th><th>FY2025</th><th>TTM (Mar&#x27;26)</th><th>FY2026E</th></tr></thead><tbody><tr><td>Revenue</td><td>$75.5M</td><td>$187.2M</td><td>$501.0M</td><td>$757.1M</td><td>$750.7M (cons.)</td></tr><tr><td>Gross profit</td><td>$36.1M</td><td>$100.1M</td><td>$342.0M</td><td>$517.8M</td><td>$506.5M</td></tr><tr><td>EBIT</td><td>-$157.2M</td><td>-$27.2M</td><td>$17.3M</td><td>-$405.8M</td><td>-$540.1M</td></tr><tr><td>Net income</td><td>-$171.8M</td><td>-$28.9M</td><td>$86.9M</td><td>$158.3M</td><td>-$219.7M</td></tr><tr><td>EPS (diluted)</td><td>-$3.14</td><td>-$0.29</td><td>$0.39</td><td>$0.48</td><td>-$2.02 (cons.)</td></tr><tr><td>Gross margin</td><td>47.8%</td><td>53.5%</td><td>68.3%</td><td>68.4%</td><td>67.5%</td></tr><tr><td>FCF</td><td>-$110M</td><td>-$428M</td><td>-$1,127M</td><td>-$2,321M</td><td>-$2,380M (cons.)</td></tr></tbody></table></div>
+
+<h3 class="subsection-heading">Balance sheet &amp; returns (as of 2026-03-31)</h3>
+
+<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Metric</th><th>Value</th><th>Notes</th></tr></thead><tbody><tr><td>Cash &amp; equivalents</td><td>$2,213M</td><td>Swollen by capital raises + GPU facility draws</td></tr><tr><td>Total debt</td><td>$3,965M</td><td>Incl. $3.65B investment-grade GPU financing (closed Jun &#x27;26 post-quarter at full size)</td></tr><tr><td>Net debt</td><td>$1,752M</td><td>First net-debt position in company history</td></tr><tr><td>Shareholders&#x27; equity</td><td>$2,665M</td><td>Book value $8.41/share vs $54 price</td></tr><tr><td>Shares out (YoY)</td><td>+52.6%</td><td>Persistent ATM issuance is part of the funding model</td></tr><tr><td>ROE (TTM)</td><td>~5.9%</td><td>GAAP NI distorted by one-off non-operating gains in FQ1&#x27;26</td></tr></tbody></table></div>
+
+<div class="prose"><p>Cash flow quality is the weak point of the story. TTM free cash flow is -$2.3B against $158M of GAAP net income — the divergence is nearly all growth CapEx (GPUs, data-center construction) plus working capital for the Microsoft deployment. GAAP earnings are also noisy: FQ1 2026 included a ~$654M non-operating gain (largely fair-value/financing items) while FQ3 2026 swung to a -$248M loss on depreciation, SG&amp;A scale-up and prepayment write-downs. Until the Blackwell fleet is fully revenue-generating, reported earnings tell you little; contracted ARR conversion is the number that matters.</p></div>
+
+<p class="source-note">Source: stockanalysis.com financials (Fiscal.ai, updated 2026-05-08); SEC 10-Q/10-K, EDGAR CIK 1878848.</p>
+
+</section>
+<div class="section-divider"></div>
+<section class="section-block" id="s-5-valuation">
+<div class="section-heading"><span class="section-num">5.</span><h2 class="section-title">Valuation</h2></div>
+
+<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Multiple</th><th>Current</th><th>Sector Median</th><th>5-yr Avg</th><th>Signal</th></tr></thead><tbody><tr><td>P/E (TTM)</td><td>99.4x</td><td>~25x (data center/infra)</td><td>n/m (loss-making history)</td><td>↓ expensive</td></tr><tr><td>Forward P/E</td><td>n/m (FY26E loss)</td><td>—</td><td>—</td><td>—</td></tr><tr><td>PEG</td><td>n/m</td><td>—</td><td>—</td><td>—</td></tr><tr><td>EV/EBITDA (TTM)</td><td>n/m (EBITDA -$36M)</td><td>—</td><td>—</td><td>—</td></tr><tr><td>P/S (TTM)</td><td>25.5x</td><td>~6x</td><td>~8x</td><td>↓ very expensive</td></tr><tr><td>EV / FY27E revenue</td><td>~6.8x (on $3.08B cons.)</td><td>~5x</td><td>—</td><td>→ reasonable IF ramp lands</td></tr><tr><td>Dividend yield</td><td>n/a</td><td>—</td><td>—</td><td>—</td></tr></tbody></table></div>
+
+<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Scenario</th><th>Implied / Share</th><th>% vs Current</th><th>Key assumption</th></tr></thead><tbody><tr><td>Bear</td><td>$22</td><td>-59%</td><td>Microsoft deal delivers but no follow-on; BTC mining fades; FY28 EBITDA ~$1.2B, 8x EV/EBITDA, debt-loaded equity</td></tr><tr><td>Base</td><td>$58</td><td>+7%</td><td>$4.4B ARR achieved by FY28 at ~55% EBITDA margin → ~$2.4B EBITDA, 10x, net debt ~$4B</td></tr><tr><td>Bull</td><td>$105</td><td>+94%</td><td>Second hyperscaler contract (Bernstein&#x27;s $5.5B scenario) + South Australia monetized; ~$3.5B FY28 EBITDA, 12x</td></tr><tr><td>Reverse DCF</td><td>Priced for ~$2.3B FY28 EBITDA</td><td>—</td><td>Current EV ~$21.1B implies the Childress ARR target largely succeeds; zero failure tolerance priced in</td></tr></tbody></table></div>
+
+<div class="prose"><p>Multiples on trailing numbers are meaningless mid-pivot; the market is pricing FY27–28 contracted AI revenue. On consensus FY27 revenue of $3.08B the EV/revenue multiple is ordinary — the equity question is execution and dilution, not the multiple.</p></div>
+
+</section>
+<div class="section-divider"></div>
+<section class="section-block" id="s-6-analyst-coverage">
+<div class="section-heading"><span class="section-num">6.</span><h2 class="section-title">Analyst Coverage</h2></div>
+
+<div class="chart-wrap"><svg viewBox="0 0 620 100" style="width:100%;height:auto;display:block" xmlns="http://www.w3.org/2000/svg">
+  <text x="44" y="13" font-size="11.5" font-weight="600" fill="#0f3d2e" font-family="var(--font-body)">Analyst Target Range</text>
+  <line x1="44" y1="62" x2="576" y2="62" stroke="var(--border-strong)" stroke-width="2.5"/>
+  <circle cx="44.0" cy="62" r="7" fill="#9ca3af"/>
+  <text x="44.0" y="36" text-anchor="middle" font-size="9.5" fill="var(--fg-muted)" font-family="var(--font-mono)">Low</text>
+  <text x="44.0" y="24" text-anchor="middle" font-size="10.5" font-weight="600" fill="#9ca3af" font-family="var(--font-mono)">$41.00</text>
+  <circle cx="303.7" cy="62" r="7" fill="#0f3d2e"/>
+  <text x="303.7" y="84" text-anchor="middle" font-size="9.5" fill="var(--fg-muted)" font-family="var(--font-mono)">Median</text>
+  <text x="303.7" y="97" text-anchor="middle" font-size="10.5" font-weight="600" fill="#0f3d2e" font-family="var(--font-mono)">$82.50</text>
+  <circle cx="125.5" cy="62" r="7" fill="#b8835a"/>
+  <text x="125.5" y="36" text-anchor="middle" font-size="9.5" fill="var(--fg-muted)" font-family="var(--font-mono)">Current</text>
+  <text x="125.5" y="24" text-anchor="middle" font-size="10.5" font-weight="600" fill="#b8835a" font-family="var(--font-mono)">$54.02</text>
+  <circle cx="576.0" cy="62" r="7" fill="#9ca3af"/>
+  <text x="576.0" y="84" text-anchor="middle" font-size="9.5" fill="var(--fg-muted)" font-family="var(--font-mono)">High</text>
+  <text x="576.0" y="97" text-anchor="middle" font-size="10.5" font-weight="600" fill="#9ca3af" font-family="var(--font-mono)">$126.00</text>
+</svg></div>
+
+<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Analyst / Firm</th><th>Date</th><th>Rating</th><th>Prev.</th><th>Target</th><th>Prev. Tgt</th><th>Upside %</th></tr></thead><tbody><tr><td>Nick Giles — B. Riley</td><td>2026-06-04</td><td>Buy</td><td>=</td><td>$96</td><td>$88</td><td>+77.7%</td></tr><tr><td>Joseph Vafi — Canaccord</td><td>2026-06-03</td><td>Buy</td><td>=</td><td>$79</td><td>$70</td><td>+46.2%</td></tr><tr><td>Mike Ng — Goldman Sachs</td><td>2026-05-28</td><td>Hold</td><td>=</td><td>$50</td><td>$44</td><td>-7.4%</td></tr><tr><td>Brett Knoblauch — Cantor Fitzgerald</td><td>2026-05-28</td><td>Overweight</td><td>=</td><td>$99</td><td>$77</td><td>+83.3%</td></tr><tr><td>John Todaro — Needham</td><td>2026-05-14</td><td>Hold</td><td>=</td><td>n/a</td><td>n/a</td><td>—</td></tr><tr><td>Consensus (15 analysts)</td><td>2026-06-04</td><td>Buy (9 Strong Buy / 1 Buy / 3 Hold / 2 Sell)</td><td>—</td><td>$81.07 avg / $82.50 median</td><td>—</td><td>+50.1%</td></tr><tr><td>Range</td><td>—</td><td>—</td><td>—</td><td>$41 low / $126 high</td><td>—</td><td>-24.6% to +131.8%</td></tr></tbody></table></div>
+
+<div class="prose"><p>The split is instructive. Bulls (Cantor, B. Riley) anchor on contracted ARR economics — Knoblauch called the Microsoft deal transformative for visibility and raised to $99; Giles raised to $96 on the South Australia transmission agreement, citing first-mover advantage in the home market. Goldman&#x27;s Ng stays at Hold/$50, having stress-tested the Dell purchase math and flagged financing intensity. Two sell ratings reflect the dilution-and-debt treadmill argument. Bernstein (June) put a street-high framing on the two-part $5.5B follow-on opportunity (&#x27;NVIDIA blessing&#x27;).</p></div>
+
+<p class="source-note">Source: stockanalysis.com/stocks/iren/forecast/ (S&amp;P Global + TipRanks, updated 2026-06-04); TheFly/TipRanks notes Jun 2026.</p>
+
+</section>
+<div class="section-divider"></div>
+<section class="section-block" id="s-7-technical-analysis">
+<div class="section-heading"><span class="section-num">7.</span><h2 class="section-title">Technical Analysis</h2></div>
+
+<div class="chart-wrap"><svg viewBox="0 0 620 200" style="width:100%;height:auto;display:block" xmlns="http://www.w3.org/2000/svg">
+  <defs><linearGradient id="pg" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#2d6b4f" stop-opacity="0.16"/><stop offset="100%" stop-color="#2d6b4f" stop-opacity="0"/></linearGradient></defs>
+  <polygon points="52,166 52.0,154.0 54.2,154.3 56.4,154.5 58.6,155.1 60.8,154.1 63.0,155.2 65.2,155.1 67.5,154.0 69.7,153.7 71.9,152.3 74.1,151.8 76.3,149.7 78.5,148.3 80.7,147.4 82.9,146.3 85.1,145.6 87.3,143.7 89.5,143.5 91.7,143.6 94.0,143.5 96.2,143.4 98.4,144.7 100.6,143.0 102.8,143.6 105.0,142.9 107.2,141.7 109.4,141.9 111.6,141.5 113.8,140.8 116.0,140.2 118.2,141.6 120.4,142.2 122.7,144.1 124.9,145.4 127.1,144.8 129.3,144.9 131.5,146.0 133.7,144.3 135.9,144.3 138.1,141.3 140.3,140.9 142.5,141.1 144.7,141.8 146.9,142.1 149.2,142.2 151.4,140.0 153.6,139.0 155.8,137.4 158.0,140.6 160.2,138.9 162.4,139.2 164.6,136.2 166.8,133.5 169.0,133.7 171.2,134.7 173.4,133.6 175.6,128.0 177.9,123.7 180.1,125.2 182.3,128.6 184.5,128.5 186.7,128.5 188.9,122.0 191.1,116.4 193.3,117.6 195.5,115.8 197.7,110.7 199.9,111.8 202.1,109.4 204.4,112.0 206.6,108.2 208.8,102.9 211.0,103.1 213.2,94.4 215.4,95.8 217.6,103.0 219.8,96.4 222.0,94.8 224.2,94.5 226.4,94.6 228.6,89.0 230.8,77.2 233.1,70.8 235.3,73.4 237.5,67.3 239.7,73.9 241.9,66.8 244.1,58.0 246.3,60.5 248.5,70.5 250.7,72.3 252.9,74.8 255.1,81.3 257.3,86.8 259.6,80.2 261.8,68.8 264.0,65.4 266.2,69.6 268.4,72.8 270.6,76.4 272.8,72.3 275.0,60.9 277.2,62.7 279.4,46.8 281.6,62.2 283.8,69.6 286.0,73.2 288.3,77.8 290.5,80.5 292.7,92.0 294.9,95.7 297.1,94.0 299.3,91.6 301.5,96.5 303.7,100.4 305.9,102.3 308.1,92.2 310.3,93.9 312.5,92.3 314.8,93.3 317.0,92.2 319.2,104.2 321.4,99.6 323.6,95.5 325.8,98.4 328.0,95.7 330.2,94.9 332.4,99.7 334.6,99.6 336.8,105.8 339.0,113.4 341.2,111.6 343.5,116.1 345.7,112.9 347.9,106.2 350.1,102.7 352.3,102.7 354.5,102.8 356.7,105.5 358.9,107.0 361.1,108.8 363.3,109.6 365.5,101.6 367.7,92.6 370.0,96.4 372.2,100.1 374.4,96.8 376.6,96.2 378.8,89.2 381.0,84.9 383.2,85.1 385.4,86.7 387.6,77.1 389.8,82.8 392.0,84.1 394.2,86.1 396.4,78.9 398.7,85.9 400.9,73.5 403.1,68.7 405.3,73.8 407.5,83.7 409.7,84.8 411.9,82.6 414.1,98.0 416.3,106.4 418.5,103.0 420.7,96.0 422.9,101.3 425.2,101.7 427.4,106.0 429.6,102.4 431.8,104.4 434.0,102.6 436.2,100.7 438.4,106.1 440.6,102.2 442.8,97.2 445.0,99.5 447.2,99.1 449.4,104.5 451.6,103.8 453.9,107.9 456.1,99.8 458.3,105.8 460.5,111.4 462.7,107.9 464.9,109.1 467.1,102.8 469.3,103.8 471.5,103.5 473.7,98.0 475.9,101.2 478.1,102.4 480.4,103.3 482.6,103.9 484.8,102.5 487.0,104.2 489.2,103.7 491.4,110.2 493.6,114.0 495.8,119.6 498.0,115.3 500.2,115.6 502.4,114.5 504.6,113.9 506.8,112.9 509.1,111.2 511.3,110.8 513.5,107.1 515.7,101.0 517.9,94.0 520.1,91.7 522.3,93.5 524.5,92.8 526.7,91.8 528.9,97.6 531.1,92.4 533.3,86.5 535.6,88.7 537.8,92.4 540.0,98.8 542.2,101.4 544.4,97.1 546.6,96.8 548.8,90.6 551.0,82.1 553.2,71.9 555.4,78.6 557.6,71.6 559.8,81.4 562.0,79.1 564.3,81.4 566.5,76.1 568.7,85.0 570.9,89.0 573.1,93.4 575.3,85.4 577.5,76.7 579.7,78.7 581.9,73.9 584.1,60.8 586.3,66.9 588.5,67.8 590.8,64.8 593.0,62.8 595.2,64.6 597.4,70.5 599.6,82.7 601.8,74.8 604.0,83.2 604,166" fill="url(#pg)"/>
+  <polyline points="52.0,154.0 54.2,154.3 56.4,154.5 58.6,155.1 60.8,154.1 63.0,155.2 65.2,155.1 67.5,154.0 69.7,153.7 71.9,152.3 74.1,151.8 76.3,149.7 78.5,148.3 80.7,147.4 82.9,146.3 85.1,145.6 87.3,143.7 89.5,143.5 91.7,143.6 94.0,143.5 96.2,143.4 98.4,144.7 100.6,143.0 102.8,143.6 105.0,142.9 107.2,141.7 109.4,141.9 111.6,141.5 113.8,140.8 116.0,140.2 118.2,141.6 120.4,142.2 122.7,144.1 124.9,145.4 127.1,144.8 129.3,144.9 131.5,146.0 133.7,144.3 135.9,144.3 138.1,141.3 140.3,140.9 142.5,141.1 144.7,141.8 146.9,142.1 149.2,142.2 151.4,140.0 153.6,139.0 155.8,137.4 158.0,140.6 160.2,138.9 162.4,139.2 164.6,136.2 166.8,133.5 169.0,133.7 171.2,134.7 173.4,133.6 175.6,128.0 177.9,123.7 180.1,125.2 182.3,128.6 184.5,128.5 186.7,128.5 188.9,122.0 191.1,116.4 193.3,117.6 195.5,115.8 197.7,110.7 199.9,111.8 202.1,109.4 204.4,112.0 206.6,108.2 208.8,102.9 211.0,103.1 213.2,94.4 215.4,95.8 217.6,103.0 219.8,96.4 222.0,94.8 224.2,94.5 226.4,94.6 228.6,89.0 230.8,77.2 233.1,70.8 235.3,73.4 237.5,67.3 239.7,73.9 241.9,66.8 244.1,58.0 246.3,60.5 248.5,70.5 250.7,72.3 252.9,74.8 255.1,81.3 257.3,86.8 259.6,80.2 261.8,68.8 264.0,65.4 266.2,69.6 268.4,72.8 270.6,76.4 272.8,72.3 275.0,60.9 277.2,62.7 279.4,46.8 281.6,62.2 283.8,69.6 286.0,73.2 288.3,77.8 290.5,80.5 292.7,92.0 294.9,95.7 297.1,94.0 299.3,91.6 301.5,96.5 303.7,100.4 305.9,102.3 308.1,92.2 310.3,93.9 312.5,92.3 314.8,93.3 317.0,92.2 319.2,104.2 321.4,99.6 323.6,95.5 325.8,98.4 328.0,95.7 330.2,94.9 332.4,99.7 334.6,99.6 336.8,105.8 339.0,113.4 341.2,111.6 343.5,116.1 345.7,112.9 347.9,106.2 350.1,102.7 352.3,102.7 354.5,102.8 356.7,105.5 358.9,107.0 361.1,108.8 363.3,109.6 365.5,101.6 367.7,92.6 370.0,96.4 372.2,100.1 374.4,96.8 376.6,96.2 378.8,89.2 381.0,84.9 383.2,85.1 385.4,86.7 387.6,77.1 389.8,82.8 392.0,84.1 394.2,86.1 396.4,78.9 398.7,85.9 400.9,73.5 403.1,68.7 405.3,73.8 407.5,83.7 409.7,84.8 411.9,82.6 414.1,98.0 416.3,106.4 418.5,103.0 420.7,96.0 422.9,101.3 425.2,101.7 427.4,106.0 429.6,102.4 431.8,104.4 434.0,102.6 436.2,100.7 438.4,106.1 440.6,102.2 442.8,97.2 445.0,99.5 447.2,99.1 449.4,104.5 451.6,103.8 453.9,107.9 456.1,99.8 458.3,105.8 460.5,111.4 462.7,107.9 464.9,109.1 467.1,102.8 469.3,103.8 471.5,103.5 473.7,98.0 475.9,101.2 478.1,102.4 480.4,103.3 482.6,103.9 484.8,102.5 487.0,104.2 489.2,103.7 491.4,110.2 493.6,114.0 495.8,119.6 498.0,115.3 500.2,115.6 502.4,114.5 504.6,113.9 506.8,112.9 509.1,111.2 511.3,110.8 513.5,107.1 515.7,101.0 517.9,94.0 520.1,91.7 522.3,93.5 524.5,92.8 526.7,91.8 528.9,97.6 531.1,92.4 533.3,86.5 535.6,88.7 537.8,92.4 540.0,98.8 542.2,101.4 544.4,97.1 546.6,96.8 548.8,90.6 551.0,82.1 553.2,71.9 555.4,78.6 557.6,71.6 559.8,81.4 562.0,79.1 564.3,81.4 566.5,76.1 568.7,85.0 570.9,89.0 573.1,93.4 575.3,85.4 577.5,76.7 579.7,78.7 581.9,73.9 584.1,60.8 586.3,66.9 588.5,67.8 590.8,64.8 593.0,62.8 595.2,64.6 597.4,70.5 599.6,82.7 601.8,74.8 604.0,83.2" fill="none" stroke="#2d6b4f" stroke-width="2.0" stroke-linejoin="round" stroke-linecap="round"/>
+  <polyline points="160.2,145.4 162.4,145.1 164.6,144.8 166.8,144.4 169.0,143.9 171.2,143.5 173.4,143.1 175.6,142.6 177.9,142.0 180.1,141.4 182.3,140.9 184.5,140.5 186.7,140.0 188.9,139.5 191.1,138.9 193.3,138.3 195.5,137.7 197.7,137.1 199.9,136.4 202.1,135.7 204.4,135.1 206.6,134.4 208.8,133.6 211.0,132.8 213.2,131.8 215.4,130.9 217.6,130.1 219.8,129.2 222.0,128.2 224.2,127.3 226.4,126.4 228.6,125.3 230.8,124.0 233.1,122.6 235.3,121.1 237.5,119.6 239.7,118.2 241.9,116.6 244.1,114.9 246.3,113.2 248.5,111.8 250.7,110.4 252.9,109.1 255.1,107.9 257.3,106.8 259.6,105.5 261.8,104.1 264.0,102.6 266.2,101.3 268.4,99.9 270.6,98.7 272.8,97.3 275.0,95.8 277.2,94.4 279.4,92.7 281.6,91.2 283.8,89.9 286.0,88.8 288.3,87.9 290.5,87.0 292.7,86.3 294.9,85.6 297.1,84.9 299.3,84.3 301.5,83.9 303.7,83.6 305.9,83.3 308.1,83.0 310.3,82.6 312.5,82.3 314.8,81.9 317.0,81.6 319.2,81.6 321.4,81.5 323.6,81.5 325.8,81.6 328.0,81.4 330.2,81.4 332.4,81.5 334.6,81.6 336.8,81.8 339.0,82.3 341.2,83.0 343.5,83.9 345.7,84.7 347.9,85.5 350.1,86.1 352.3,86.8 354.5,87.7 356.7,88.6 358.9,89.3 361.1,90.0 363.3,90.7 365.5,91.1 367.7,91.3 370.0,91.6 372.2,92.2 374.4,92.8 376.6,93.4 378.8,93.7 381.0,93.9 383.2,94.1 385.4,94.6 387.6,94.9 389.8,95.6 392.0,96.1 394.2,96.4 396.4,96.5 398.7,96.7 400.9,96.5 403.1,96.1 405.3,95.6 407.5,95.4 409.7,95.3 411.9,95.0 414.1,95.0 416.3,95.1 418.5,95.3 420.7,95.3 422.9,95.5 425.2,95.7 427.4,95.9 429.6,95.9 431.8,96.0 434.0,96.1 436.2,96.2 438.4,96.4 440.6,96.5 442.8,96.5 445.0,96.5 447.2,96.4 449.4,96.2 451.6,96.0 453.9,95.9 456.1,95.6 458.3,95.6 460.5,95.8 462.7,95.9 464.9,96.0 467.1,95.9 469.3,95.9 471.5,95.8 473.7,95.5 475.9,95.5 478.1,95.7 480.4,95.9 482.6,95.9 484.8,96.0 487.0,96.2 489.2,96.5 491.4,97.0 493.6,97.6 495.8,98.2 498.0,99.0 500.2,99.7 502.4,100.3 504.6,100.8 506.8,101.5 509.1,102.0 511.3,102.8 513.5,103.5 515.7,104.1 517.9,104.3 520.1,104.4 522.3,104.6 524.5,104.5 526.7,104.2 528.9,104.1 531.1,104.1 533.3,103.8 535.6,103.5 537.8,103.2 540.0,103.2 542.2,103.1 544.4,103.0 546.6,102.9 548.8,102.6 551.0,102.2 553.2,101.7 555.4,101.3 557.6,100.7 559.8,100.3 562.0,99.8 564.3,99.2 566.5,98.8 568.7,98.3 570.9,97.9 573.1,97.6 575.3,97.1 577.5,96.6 579.7,96.1 581.9,95.5 584.1,94.8 586.3,94.1 588.5,93.4 590.8,92.6 593.0,91.8 595.2,91.0 597.4,90.4 599.6,90.0 601.8,89.2 604.0,88.6" fill="none" stroke="#b8835a" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/>
+  <polyline points="491.4,108.7 493.6,108.5 495.8,108.4 498.0,108.2 500.2,108.0 502.4,107.8 504.6,107.6 506.8,107.4 509.1,107.1 511.3,106.9 513.5,106.7 515.7,106.4 517.9,106.2 520.1,105.9 522.3,105.6 524.5,105.4 526.7,105.1 528.9,104.9 531.1,104.6 533.3,104.3 535.6,104.0 537.8,103.8 540.0,103.6 542.2,103.3 544.4,103.1 546.6,102.9 548.8,102.6 551.0,102.3 553.2,102.0 555.4,101.7 557.6,101.3 559.8,101.0 562.0,100.7 564.3,100.4 566.5,100.0 568.7,99.8 570.9,99.5 573.1,99.2 575.3,98.9 577.5,98.6 579.7,98.3 581.9,97.9 584.1,97.5 586.3,97.2 588.5,96.8 590.8,96.4 593.0,96.0 595.2,95.6 597.4,95.3 599.6,95.0 601.8,94.7 604.0,94.4" fill="none" stroke="#888888" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="4,3"/>
+  <line x1="52" y1="36.0" x2="604" y2="36.0" stroke="var(--grid-line)" stroke-width="1"/>
+  <text x="47" y="40.0" text-anchor="end" font-size="9.5" fill="var(--fg-faint)" font-family="var(--font-mono)">$83</text>
+  <line x1="52" y1="79.3" x2="604" y2="79.3" stroke="var(--grid-line)" stroke-width="1"/>
+  <text x="47" y="83.3" text-anchor="end" font-size="9.5" fill="var(--fg-faint)" font-family="var(--font-mono)">$56</text>
+  <line x1="52" y1="122.7" x2="604" y2="122.7" stroke="var(--grid-line)" stroke-width="1"/>
+  <text x="47" y="126.7" text-anchor="end" font-size="9.5" fill="var(--fg-faint)" font-family="var(--font-mono)">$30</text>
+  <line x1="52" y1="166.0" x2="604" y2="166.0" stroke="var(--grid-line)" stroke-width="1"/>
+  <text x="47" y="170.0" text-anchor="end" font-size="9.5" fill="var(--fg-faint)" font-family="var(--font-mono)">$3</text>
+  <line x1="52" y1="166" x2="604" y2="166" stroke="var(--border-strong)" stroke-width="1"/>
+  <text x="52" y="13" font-size="11.5" font-weight="600" fill="#0f3d2e" font-family="var(--font-body)">IREN · 1Y daily close, 50DMA (amber) / 200DMA</text>
+</svg></div>
+
+<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Indicator</th><th>Value</th><th>Read</th></tr></thead><tbody><tr><td>Current price</td><td>$54.02</td><td>Down 8.7% on the day; consolidating after parabolic run</td></tr><tr><td>50DMA</td><td>$50.70</td><td>Price above — short-term trend intact</td></tr><tr><td>200DMA</td><td>$47.14</td><td>Price well above — long-term uptrend intact</td></tr><tr><td>RSI (14)</td><td>47</td><td>Neutral; the May overbought condition has reset</td></tr><tr><td>MACD</td><td>+2.22 vs signal +3.33</td><td>Bearish cross — momentum cooling</td></tr><tr><td>Key support</td><td>$48–52 zone</td><td>Early-June lows and May consolidation shelf</td></tr><tr><td>Key resistance</td><td>$66–70, then $76.87</td><td>June highs; all-time high above</td></tr><tr><td>Beta</td><td>4.23</td><td>Extreme — trades as a leveraged AI/BTC proxy</td></tr><tr><td>Weekly volatility</td><td>~15%</td><td>Position sizing must respect this</td></tr></tbody></table></div>
+
+<p class="source-note">Source: Computed from IBKR daily closes, Jun 2025 – Jun 9, 2026.</p>
+
+</section>
+<div class="section-divider"></div>
+<section class="section-block" id="s-8-catalysts-risks">
+<div class="section-heading"><span class="section-num">8.</span><h2 class="section-title">Catalysts &amp; Risks</h2></div>
+
+<h3 class="subsection-heading">Catalysts</h3>
+
+<div class="prose"><ul><li>FY Q4 / FY2026 results (~Aug 2026) — first quarter with material Blackwell revenue contribution; watch AI Cloud ARR run-rate vs the $4.4B Childress target.</li><li>Childress Blackwell energization milestones through 2H 2026 — Dell deliveries against the $1.6B order convert directly into contracted revenue.</li><li>A second hyperscaler contract — Bernstein frames a $5.5B two-part opportunity; any signing re-rates the stock.</li><li>South Australia 800MW campus — financing/anchor-tenant announcements would validate the multi-GW pipeline.</li><li>Bitcoin price recovery — mining still carries near-term revenue; BTC weakness has been dragging the whole complex (CNBC, 2026-06-03).</li></ul></div>
+
+<h3 class="subsection-heading">Risks</h3>
+
+<div class="prose"><ul><li>Customer concentration: Microsoft is the anchor of the AI pivot — any delivery dispute, delay or renegotiation hits ~$9.7B of contracted backlog.</li><li>Financing treadmill: -$2.3B TTM FCF funded by $3.97B debt + 52% YoY share dilution; if capital markets close or rates spike, the growth model stalls.</li><li>BTC drawdown: mining revenue and sentiment beta (4.23) mean a crypto bear market can halve the stock irrespective of AI execution — June&#x27;s BTC slide already took IREN down ~25% from highs.</li><li>GPU depreciation risk: $1.6B+ of Blackwell hardware depreciating over ~5 years; if AI cloud pricing compresses before payback, unit economics break.</li><li>Grid/permitting delays at Sweetwater/South Australia push ARR conversion to the right while interest expense accrues now.</li><li>Halal-mandate risk (specific to this portfolio): the name now fails every Shariah lens — see Section 3.</li></ul></div>
+
+</section>
+<div class="section-divider"></div>
+<section class="section-block" id="s-9-deep-dive-capital-structure-dilution">
+<div class="section-heading"><span class="section-num">9.</span><h2 class="section-title">Deep-Dive: Capital Structure &amp; Dilution</h2></div>
+
+<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Item</th><th>FY2024</th><th>FY2025</th><th>TTM Mar&#x27;26</th></tr></thead><tbody><tr><td>Shares outstanding</td><td>187.9M</td><td>258.1M</td><td>341.0M (357.4M at Jun &#x27;26)</td></tr><tr><td>Total debt</td><td>$1.3M</td><td>$964M</td><td>$3,965M</td></tr><tr><td>Cash</td><td>$404.6M</td><td>$564.5M</td><td>$2,213M</td></tr><tr><td>Net cash (debt)</td><td>+$403M</td><td>-$400M</td><td>-$1,752M</td></tr><tr><td>Book value/share</td><td>$11.01</td><td>$8.14</td><td>$8.41</td></tr></tbody></table></div>
+
+<div class="prose"><p>In eight quarters IREN went from debt-free to ~$4B of debt while nearly doubling the share count. That is a conscious strategy — sell equity when the stock is expensive, borrow against contracted GPU revenue when lenders will underwrite it (&#x27;investment-grade GPU financing&#x27;). It has worked because the stock 8x&#x27;d in a year (+760% market cap YoY). The fragility: every leg of new growth (South Australia, a second hyperscaler) requires fresh capital, so the equity story depends on markets staying open. Short interest in the neocloud complex is elevated (Invezz, 2026-05-21) — traders are explicitly betting the funding cycle breaks.</p></div>
+
+</section>
+<div class="section-divider"></div>
+<section class="section-block" id="s-10-summary-thesis">
+<div class="section-heading"><span class="section-num">10.</span><h2 class="section-title">Summary &amp; Thesis</h2></div>
+
+<div class="prose"><p>Bull case: IREN owns the scarcest assets in AI infrastructure — energized power, land and grid connections — and has converted them into a ~$9.7B Microsoft contract with a credible path to $4.4B ARR from Childress alone, with the Australian land bank as a free option. At ~6.8x EV/FY27E revenue, the market is not paying a premium for the option value; consensus targets ($81 avg, $126 high) imply 50–130% upside if execution continues.</p><p>Bear case: the model consumes capital faster than it generates it (-$2.3B TTM FCF), GAAP losses are widening into the ramp, the share count compounds at 50%+, and the whole complex trades at 4.2 beta to BTC and AI sentiment. A single stumble — Microsoft delivery slip, BTC bear market, credit window closing — forces dilution at depressed prices. Goldman&#x27;s $50 Hold and two Sell ratings are not fringe views.</p><p>For this portfolio specifically: IREN is now NOT Shariah-compliant on all four lenses (Zoya, Musaffa, AAOIFI, PIF). Under a halal mandate the investment verdict is overridden — the position warrants review for exit with purification of ~$0.13/share of attributable interest income, regardless of the attractive commercial thesis.</p></div>
+
+<h3 class="subsection-heading">What to watch next</h3>
+
+<div class="prose"><ul><li>FY2026 results (~Aug 2026): AI Cloud ARR run-rate and the FY27 revenue guide vs $3.08B consensus.</li><li>Monthly operational updates: Blackwell racks energized at Childress vs plan.</li><li>Quarterly 10-Q interest income/expense lines — the Shariah screen would only heal if the cash pile shrinks into CapEx and debt is restructured; re-run the PIF screen each quarter.</li></ul></div>
+
+</section>
+      <div class="disclaimer-block"><strong>Disclaimer:</strong> This is research, not financial advice. Do your own due diligence.</div>
+
+    </div>
+  </main>
+
+</div>
+<script>
+(function() {
+  var sections = document.querySelectorAll('.section-block[id]');
+  var items    = document.querySelectorAll('.toc-item[data-target]');
+  if (!sections.length || !items.length) return;
+
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        items.forEach(function(it) {
+          it.classList.toggle('active', it.dataset.target === entry.target.id);
+        });
+      }
+    });
+  }, { rootMargin: '-15% 0px -72% 0px', threshold: 0 });
+
+  sections.forEach(function(s) { observer.observe(s); });
+
+  items.forEach(function(item) {
+    item.addEventListener('click', function(ev) {
+      ev.preventDefault();
+      var t = document.getElementById(item.dataset.target);
+      if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+})();
+</script>
+</body>
+</html>

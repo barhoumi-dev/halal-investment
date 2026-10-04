@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Taiwan Semiconductor Manufacturing (TSM)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap">
+  <style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── Verdant light (default) ── */
+:root {
+  --primary:        #0f3d2e;
+  --primary-fg:     #faf6eb;
+  --accent:         #b8835a;
+
+  --halal:          #2d6b4f;
+  --halal-bg:       rgba(45,107,79,0.08);
+  --haram:          #b54a3a;
+  --haram-bg:       rgba(181,74,58,0.08);
+  --review:         #b8835a;
+  --review-bg:      rgba(184,131,90,0.10);
+
+  --bg:             #f7f4ec;
+  --bg-soft:        #efeadd;
+  --panel:          #fffdf7;
+  --panel-2:        #faf6eb;
+
+  --fg:             #15211b;
+  --fg-soft:        #3c4a40;
+  --fg-muted:       #7a7368;
+  --fg-faint:       #a89e8c;
+
+  --border:         rgba(15,33,27,0.10);
+  --border-strong:  rgba(15,33,27,0.18);
+  --grid-line:      rgba(15,33,27,0.05);
+
+  --shadow-sm: 0 1px 2px rgba(15,33,27,.04), 0 1px 0 rgba(255,255,255,.6) inset;
+  --shadow-md: 0 1px 3px rgba(15,33,27,.06), 0 8px 24px rgba(15,33,27,.05);
+
+  --font-display: "Instrument Serif","Source Serif 4",Georgia,serif;
+  --font-body:    "Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-mono:    "Geist Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --display-tracking: -0.01em;
+
+  --sidebar-w: 220px;
+  --content-max: 960px;
+}
+
+/* ── Verdant dark ── */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --primary:       #d8b893;
+    --primary-fg:    #0e1612;
+    --accent:        #d8b893;
+
+    --bg:            #0e1612;
+    --bg-soft:       #131c17;
+    --panel:         #16201a;
+    --panel-2:       #1b261f;
+    --fg:            #ece6d4;
+    --fg-soft:       #c9c2af;
+    --fg-muted:      #8c8676;
+    --fg-faint:      #5e5b50;
+    --border:        rgba(236,230,212,0.08);
+    --border-strong: rgba(236,230,212,0.16);
+    --grid-line:     rgba(236,230,212,0.04);
+    --shadow-sm:     0 1px 2px rgba(0,0,0,.4);
+    --shadow-md:     0 1px 3px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.3);
+    --halal:         #76c79b;
+    --halal-bg:      rgba(118,199,155,0.10);
+    --haram:         #ec8474;
+    --haram-bg:      rgba(236,132,116,0.10);
+    --review:        #d8b893;
+    --review-bg:     rgba(216,184,147,0.10);
+  }
+}
+
+html { scroll-behavior: smooth; font-size: 15px; }
+body {
+  font-family: var(--font-body);
+  color: var(--fg);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  line-height: 1.55;
+}
+
+/* ── App shell ── */
+.report-app {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr;
+  min-height: 100vh;
+}
+@media (max-width: 800px) {
+  .report-app { grid-template-columns: 1fr; }
+  .report-sidebar { display: none; }
+}
+
+/* ── Sidebar ── */
+.report-sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  padding: 22px 14px 24px;
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+}
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+  padding: 0 4px;
+}
+.sidebar-logomark { flex-shrink: 0; }
+.sidebar-wordmark {
+  font-family: var(--font-display);
+  font-size: 17px;
+  letter-spacing: var(--display-tracking);
+  line-height: 1;
+  color: var(--fg);
+  font-weight: 400;
+}
+.sidebar-wordmark em { font-style: normal; color: var(--accent); }
+.toc-label {
+  font-size: 10px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+  font-weight: 600;
+  padding: 0 10px 8px;
+}
+.toc-item {
+  display: block;
+  padding: 7px 10px;
+  border-radius: 8px;
+  color: var(--fg-muted);
+  font-size: 12.5px;
+  font-weight: 500;
+  text-decoration: none;
+  border: 0;
+  border-left: 2px solid transparent;
+  transition: background .15s, color .15s, border-color .15s;
+  margin-bottom: 1px;
+  cursor: pointer;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+}
+.toc-item:hover { background: var(--bg-soft); color: var(--fg); }
+.toc-item.active {
+  background: var(--bg-soft);
+  color: var(--primary);
+  border-left-color: var(--accent);
+  font-weight: 600;
+}
+
+/* ── Main ── */
+.report-main {
+  min-width: 0;
+  padding: 48px 56px 80px;
+}
+@media (max-width: 960px) { .report-main { padding: 32px 24px 64px; } }
+@media (max-width: 600px) { .report-main { padding: 20px 16px 48px; } }
+.report-body { max-width: var(--content-max); margin: 0 auto; }
+
+/* ── Header ── */
+.report-header {
+  padding-bottom: 28px;
+  margin-bottom: 0;
+  border-bottom: 2px solid var(--accent);
+}
+.header-badges {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.ticker-badge {
+  padding: 5px 11px;
+  background: var(--primary);
+  color: var(--primary-fg);
+  border-radius: 7px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .02em;
+}
+.report-title {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 4vw, 44px);
+  line-height: 1.08;
+  letter-spacing: var(--display-tracking);
+  color: var(--primary);
+  margin-bottom: 10px;
+  font-weight: 400;
+}
+.report-subtitle {
+  font-size: 13px;
+  color: var(--fg-muted);
+  font-family: var(--font-mono);
+}
+
+/* ── Sections ── */
+.section-block { padding-top: 44px; }
+.section-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 11px;
+  margin-bottom: 18px;
+}
+.section-num {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-faint);
+  min-width: 20px;
+}
+.section-title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  line-height: 1.15;
+  letter-spacing: var(--display-tracking);
+  color: var(--primary);
+  font-weight: 400;
+}
+.subsection-heading {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--fg);
+  margin-top: 22px;
+  margin-bottom: 10px;
+  letter-spacing: -.01em;
+}
+.section-divider {
+  height: 1px;
+  background: var(--border);
+  margin-top: 44px;
+}
+
+/* ── Prose ── */
+.prose p {
+  color: var(--fg-soft);
+  line-height: 1.65;
+  font-size: 14px;
+  margin-bottom: 11px;
+  max-width: 70ch;
+}
+.prose ul { padding-left: 20px; margin-bottom: 12px; }
+.prose li {
+  color: var(--fg-soft);
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 4px;
+}
+
+/* ── Stat cards ── */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill,minmax(148px,1fr));
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.stat-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 16px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: border-color .15s, box-shadow .15s;
+}
+.stat-label {
+  font-size: 10px;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  font-weight: 600;
+  font-family: var(--font-mono);
+}
+.stat-value {
+  font-family: var(--font-display);
+  font-size: 22px;
+  line-height: 1;
+  letter-spacing: var(--display-tracking);
+  color: var(--fg);
+  font-weight: 400;
+  font-feature-settings: "lnum";
+}
+
+/* ── Badges ── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  border: 1px solid transparent;
+}
+.badge-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.badge-halal  { color: var(--halal);  background: var(--halal-bg);  border-color: color-mix(in oklab,var(--halal) 28%,transparent); }
+.badge-haram  { color: var(--haram);  background: var(--haram-bg);  border-color: color-mix(in oklab,var(--haram) 28%,transparent); }
+.badge-review { color: var(--review); background: var(--review-bg); border-color: color-mix(in oklab,var(--review) 28%,transparent); }
+.badge-pass   { color: var(--halal);  background: var(--halal-bg);  border-color: color-mix(in oklab,var(--halal) 28%,transparent); }
+.badge-fail   { color: var(--haram);  background: var(--haram-bg);  border-color: color-mix(in oklab,var(--haram) 28%,transparent); }
+
+/* ── Card ── */
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 14px;
+  transition: border-color .15s, box-shadow .15s;
+}
+.card-inset { padding: 0 !important; overflow: hidden; }
+
+/* ── Tables ── */
+.tbl-wrap {
+  overflow-x: auto;
+  margin-bottom: 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+.tbl {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+  background: var(--panel);
+}
+.tbl thead tr { background: var(--primary); color: var(--primary-fg); }
+.tbl th {
+  padding: 9px 11px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: .04em;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+}
+.tbl th:first-child { text-align: left; padding-left: 14px; }
+.tbl td {
+  padding: 8px 11px;
+  border-bottom: 1px solid var(--border);
+  color: var(--fg-soft);
+  vertical-align: middle;
+  text-align: center;
+}
+.tbl td:first-child { text-align: left; padding-left: 14px; font-weight: 500; color: var(--fg); }
+.tbl tbody tr:last-child td { border-bottom: 0; }
+.tbl tbody tr:nth-child(even) td { background: var(--bg-soft); }
+.tbl tbody tr.hl td { background: color-mix(in oklab,var(--accent) 10%,transparent) !important; font-weight: 600; }
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+/* ── Compliance rows ── */
+.compliance-card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; box-shadow: var(--shadow-sm); margin-bottom: 14px; }
+.compliance-row {
+  display: flex;
+  align-items: center;
+  padding: 13px 18px;
+  border-bottom: 1px solid var(--border);
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.compliance-row:last-child { border-bottom: 0; }
+.compliance-info { flex: 1; min-width: 160px; }
+.compliance-name { font-size: 13px; font-weight: 500; color: var(--fg); margin-bottom: 2px; }
+.compliance-threshold { font-size: 11px; color: var(--fg-muted); font-family: var(--font-mono); }
+.compliance-bar { margin-top: 7px; height: 4px; background: var(--bg-soft); border-radius: 2px; overflow: hidden; }
+.compliance-bar-fill { height: 100%; border-radius: 2px; }
+.bar-pass { background: var(--halal); }
+.bar-fail { background: var(--haram); }
+.compliance-value { font-family: var(--font-mono); font-size: 16px; font-weight: 600; color: var(--fg); min-width: 65px; text-align: right; }
+.compliance-verdict { min-width: 58px; text-align: right; }
+
+/* ── Source note / Disclaimer ── */
+.source-note { font-size: 11px; color: var(--fg-faint); font-style: italic; margin-bottom: 14px; }
+.disclaimer-block {
+  margin-top: 52px;
+  padding: 16px 20px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font-size: 12px;
+  color: var(--fg-muted);
+  line-height: 1.6;
+}
+.disclaimer-block strong { color: var(--fg); }
+
+/* ── Chart containers ── */
+.chart-wrap { margin-bottom: 16px; background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 18px; box-shadow: var(--shadow-sm); }
+
+/* ── Print ── */
+@media print {
+  .report-sidebar { display: none !important; }
+  .report-app { grid-template-columns: 1fr !important; }
+  .report-main { padding: 0 !important; }
+  .section-block { page-break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+<div class="report-app">
+
+  <aside class="report-sidebar">
+    <div class="sidebar-logo">
+      <span class="sidebar-logomark">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="28" height="28" rx="7" fill="var(--primary)"/>
+          <path d="M8 7v14M20 7v14M8 14h8" stroke="var(--primary-fg)" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="20" cy="14" r="3.2" fill="none" stroke="var(--primary-fg)" stroke-width="1.6"/>
+          <circle cx="21" cy="13.4" r="2.6" fill="var(--primary)"/>
+        </svg>
+      </span>
+      <span class="sidebar-wordmark">Halal<em>Invest</em></span>
+    </div>
+    <div class="toc-label">Contents</div>
+    <a class="toc-item" data-target="s-1-snapshot" href="#s-1-snapshot">Snapshot</a>
+    <a class="toc-item" data-target="s-2-business-overview" href="#s-2-business-overview">Business Overview</a>
+    <a class="toc-item" data-target="s-3-shariah-compliance" href="#s-3-shariah-compliance">Shariah Compliance</a>
+    <a class="toc-item" data-target="s-4-financial-fundamentals" href="#s-4-financial-fundamentals">Financial Fundamentals</a>
+    <a class="toc-item" data-target="s-5-valuation" href="#s-5-valuation">Valuation</a>
+    <a class="toc-item" data-target="s-6-analyst-coverage" href="#s-6-analyst-coverage">Analyst Coverage</a>
+    <a class="toc-item" data-target="s-7-technical-analysis" href="#s-7-technical-analysis">Technical Analysis</a>
+    <a class="toc-item" data-target="s-8-catalysts-risks" href="#s-8-catalysts-risks">Catalysts &amp; Risks</a>
+    <a class="toc-item" data-target="s-9-deep-dive-the-geopolitical-discount-quantified" href="#s-9-deep-dive-the-geopolitical-discount-quantified">Deep-Dive: The Geopolitical Discount, Quantified</a>
+    <a class="toc-item" data-target="s-10-summary-thesis" href="#s-10-summary-thesis">Summary &amp; Thesis</a>
+  </aside>
+
+  <main class="report-main">
+    <div class="report-body">
+
+      <header class="report-header">
+        <div class="header-badges">
+          <div class="ticker-badge">TSM</div>
+          <span class="badge badge-review"><span class="badge-dot"></span>Under Review</span>
+        </div>
+        <h1 class="report-title">Taiwan Semiconductor Manufacturing (TSM)</h1>
+        <p class="report-subtitle">As of 2026-06-09 close · NYSE ADR (TWSE: 2330)</p>
+      </header>
+
+      <section class="section-block" id="s-1-snapshot">
+<div class="section-heading"><span class="section-num">1.</span><h2 class="section-title">Snapshot</h2></div>
+
+<div class="stat-grid"><div class="stat-card"><div class="stat-label">Price</div><div class="stat-value">$427.92 (ADR)</div></div><div class="stat-card"><div class="stat-label">Market Cap</div><div class="stat-value">$1.89T</div></div><div class="stat-card"><div class="stat-label">Shares Out</div><div class="stat-value">25.93B ord. (1 ADR = 5)</div></div><div class="stat-card"><div class="stat-label">52W High</div><div class="stat-value">$450.16</div></div><div class="stat-card"><div class="stat-label">52W Low</div><div class="stat-value">$205.87</div></div><div class="stat-card"><div class="stat-label">Div Yield (TTM)</div><div class="stat-value">0.62% ($2.64)</div></div><div class="stat-card"><div class="stat-label">Beta</div><div class="stat-value">1.26</div></div><div class="stat-card"><div class="stat-label">Next Earnings</div><div class="stat-value">2026-07-16 (Q2)</div></div><div class="stat-card"><div class="stat-label">Sector / Industry</div><div class="stat-value">Technology / Semiconductors — Foundry Monopoly-in-Practice</div></div></div>
+
+<p class="source-note">Source: stockanalysis.com/stocks/tsm/, close 2026-06-09.</p>
+
+</section>
+<div class="section-divider"></div>
+<section class="section-block" id="s-2-business-overview">
+<div class="section-heading"><span class="section-num">2.</span><h2 class="section-title">Business Overview</h2></div>
+
+<div class="prose"><p>TSMC manufactures the chips everyone else designs — over 90% of the world&#x27;s leading-edge (≤5nm) logic capacity, including every NVIDIA data-center GPU, every Apple silicon die, and the custom accelerators of Google, Amazon and Microsoft. The foundry model means TSMC monetizes the entire AI buildout regardless of which chip designer wins. Q1 2026 gross margin hit a record 66.3% on N3/N2 pricing power.</p><p>The numbers are historic: FY2025 revenue +31.6% (TWD 3.81T) and FY2026 consensus calls for +35.6% more — for a company this size, unprecedented. The CEO&#x27;s June message was that AI demand will outstrip supply for years; capacity is so tight that The Information reports Google and NVIDIA are exploring Intel as a backup — a headline that flatters TSMC&#x27;s position even as it seeds the long-term second-source narrative.</p><p>Moat: process leadership (N2 ramping, A16 next), unmatched yield learning, advanced packaging (CoWoS — the AI bottleneck), and an ecosystem of 500+ customers who co-optimize with TSMC for years. Risks are mostly exogenous: Taiwan-strait geopolitics, US export-control tightening (bipartisan Senate letter this week urging restrictions on supplying Chinese firms&#x27; overseas units), and the cost drag of US/Japan/Germany fab diversification.</p></div>
+
+<h3 class="subsection-heading">Revenue mix (Q1 2026 approximate)</h3>
+
+<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Platform</th><th>% Revenue</th><th>Trend</th><th>Notes</th></tr></thead><tbody><tr><td>High-performance computing (AI/DC)</td><td>~60%</td><td>Surging</td><td>NVIDIA, AMD, custom ASICs; CoWoS sold out through 2027</td></tr><tr><td>Smartphone</td><td>~25%</td><td>Stable</td><td>Apple A/M-series; seasonal</td></tr><tr><td>IoT / automotive / DCE / other</td><td>~15%</td><td>Steady</td><td>Broadening N7/N5 reuse</td></tr></tbody></table></div>
+
+<h3 class="subsection-heading">Recent strategic developments (last 12 months)</h3>
+
+<div class="prose"><ul><li>2026-06-09 — Bipartisan US senators urged tighter rules on contract chipmakers supplying Chinese firms&#x27; overseas units (Reuters) — direct TSMC compliance overhead.</li><li>2026-06-08 — The Information: Google and NVIDIA exploring Intel as backup foundry due to TSMC capacity constraints.</li><li>2026-06-05 — CEO C.C. Wei warned AI chip supply will lag demand &#x27;for years&#x27;; declined to chase memory-style capacity bets (TheStreet).</li><li>Q1 2026 (Apr) — Revenue TWD 1.134T (+35.1%), record 66.3% gross margin, net income +58% YoY; 2026 capex guide raised.</li><li>FY2025–26 — Arizona Fab 21 ramping N4/N3; Kumamoto-2 and Dresden progressing; dividend stepped up to TWD 7.0/quarter (+40% YoY).</li></ul></div>
+
+<p class="source-note">Source: Reuters 2026-06-09; The Information via TheFly 2026-06-08; company Q1 2026 release (2026-04-16).</p>
+
+</section>
+<div class="section-divider"></div>
+<section class="section-block" id="s-3-shariah-compliance">
+<div class="section-heading"><span class="section-num">3.</span><h2 class="section-title">Shariah Compliance</h2></div>
+
+<h3 class="subsection-heading">3a. Four-lens summary</h3>
+
+<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Lens</th><th>Rating</th><th>Key driver</th></tr></thead><tbody><tr><td>Zoya</td><td>Compliant</td><td>AAOIFI screen passes</td></tr><tr><td>Musaffa</td><td>Halal</td><td>Per latest screening report</td></tr><tr><td>AAOIFI (manual calc)</td><td>PASS</td><td>Interest income ~2.4% of revenue (&lt;5%); negligible leverage</td></tr><tr><td>PIF 4-step</td><td>UNCOMFORTABLE (borderline)</td><td>Interest income breached 2.5% in Q2&#x27;25 (2.70%) and Q3&#x27;25 (2.64%); Q4&#x27;25/Q1&#x27;26 ~2.4–2.5% (estimated) — the cash pile vs revenue race</td></tr><tr><td>Overall assessment</td><td>BORDERLINE — improving</td><td>Mainstream lenses pass; strict PIF reading fails on two stale quarters. Revenue growing 35% vs flat cash yields → ratio trending below 2.5%. Re-screen after Q2 2026.</td></tr></tbody></table></div>
+
+<h3 class="subsection-heading">3b. AAOIFI financial ratio screen</h3>
+
+<div class="compliance-card">
+<div class="compliance-row"><div class="compliance-info"><div class="compliance-name">Non-permissible revenue / Total revenue</div><div class="compliance-threshold">Threshold: &lt; 5%</div></div><div class="compliance-value mono">~2.4%</div><div class="compliance-verdict"><span class="badge badge-pass">PASS</span></div></div>
+<div class="compliance-row"><div class="compliance-info"><div class="compliance-name">Interest-bearing debt / Market Cap</div><div class="compliance-threshold">Threshold: &lt; 30%</div></div><div class="compliance-value mono">~1.7%</div><div class="compliance-verdict"><span class="badge badge-pass">PASS</span></div></div>
+<div class="compliance-row"><div class="compliance-info"><div class="compliance-name">Interest-bearing securities / Market Cap</div><div class="compliance-threshold">Threshold: &lt; 30%</div></div><div class="compliance-value mono">~5.5%</div><div class="compliance-verdict"><span class="badge badge-pass">PASS</span></div></div>
+<div class="compliance-row"><div class="compliance-info"><div class="compliance-name">Accounts Receivable / Market Cap</div><div class="compliance-threshold">Threshold: &lt; 49%</div></div><div class="compliance-value mono">~0.6%</div><div class="compliance-verdict"><span class="badge badge-pass">PASS</span></div></div>
+</div>
+
+<div class="prose"><p>Inputs (Q1 2026 statements, TWD; market cap 2026-06-09 ≈ TWD 61T): TTM revenue TWD 4.10T; TTM interest income ~TWD 105B → ~2.4–2.6%; total debt TWD 1.02T → ~1.7%; cash &amp; ST investments TWD 3.38T → ~5.5%; receivables TWD 363B → 0.6%. AAOIFI passes with room on every ratio except the income test, where the giant cash pile keeps the ratio near half the 5% cap.</p></div>
+
+<h3 class="subsection-heading">3c. PIF 4-step screen</h3>
+
+<div class="prose"><p>Step 1 — Core business. Semiconductor fabrication is halal. Checklist: all twelve excluded industries — N. (Chips end up in everything, including defense systems, but the screen tests TSMC&#x27;s own business: contract wafer fabrication for commercial fabless customers.)</p></div>
+
+<div class="prose"><p>Step 2 — Israel presence / human rights. TSMC&#x27;s fabs are Taiwan, US (Arizona, Washington), Japan, Germany and China (Nanjing/Shanghai, mature nodes). No Israeli operations or R&amp;D. Customer-side, Israeli fabless designers use TSMC like everyone else — customer activity, not company footprint. No HRW/Amnesty/BDS flags on TSMC. Step 2: PASS.</p><p>Step 3 — Interest income ≤ 2.5% of revenue, four consecutive quarters (20-F / quarterly IFRS reports; Q4&#x27;25 and Q1&#x27;26 interest income sits within &#x27;non-operating income&#x27; in the standardized feed — estimated from the disclosed totals):</p></div>
+
+<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Quarter</th><th>Interest Income</th><th>Total Revenue</th><th>Ratio</th><th>Pass?</th></tr></thead><tbody><tr class="hl"><td>Q2 2025 (Jun &#x27;25)</td><td>TWD 25.2B</td><td>TWD 933.8B</td><td>2.70%</td><td><span class="badge badge-fail">✗ FAIL</span></td></tr><tr class="hl"><td>Q3 2025 (Sep &#x27;25)</td><td>TWD 26.2B</td><td>TWD 989.9B</td><td>2.64%</td><td><span class="badge badge-fail">✗ FAIL</span></td></tr><tr class="hl"><td>Q4 2025 (Dec &#x27;25)</td><td>~TWD 26.5B (est.)</td><td>TWD 1,046.1B</td><td>~2.5%</td><td><span class="badge badge-fail">✗ FAIL</span></td></tr><tr><td>Q1 2026 (Mar &#x27;26)</td><td>~TWD 27B (est.)</td><td>TWD 1,134.1B</td><td>~2.4%</td><td><span class="badge badge-pass">✓ PASS</span></td></tr></tbody></table></div>
+
+<div class="prose"><p>Step 4 — Interest expense ≤ 2.5% of total expenses (TWD ~1T of low-coupon bonds against a ~TWD 475B quarterly expense base):</p></div>
+
+<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Quarter</th><th>Interest Expense</th><th>Total Expenses</th><th>Ratio</th><th>Pass?</th></tr></thead><tbody><tr><td>Q2 2025 (Jun &#x27;25)</td><td>~TWD 4.5B</td><td>~TWD 475B</td><td>~0.9%</td><td><span class="badge badge-pass">✓ PASS</span></td></tr><tr><td>Q3 2025 (Sep &#x27;25)</td><td>~TWD 4.5B</td><td>~TWD 494B</td><td>~0.9%</td><td><span class="badge badge-pass">✓ PASS</span></td></tr><tr><td>Q4 2025 (Dec &#x27;25)</td><td>~TWD 4.5B</td><td>~TWD 486B</td><td>~0.9%</td><td><span class="badge badge-pass">✓ PASS</span></td></tr><tr><td>Q1 2026 (Mar &#x27;26)</td><td>~TWD 4.5B</td><td>~TWD 480B</td><td>~0.9%</td><td><span class="badge badge-pass">✓ PASS</span></td></tr></tbody></table></div>
+
+<div class="prose"><p>Rating: UNCOMFORTABLE on a strict four-quarter reading — Q2 and Q3 2025 breached, and Q4 sits on the line. Like Dynatrace, this is the benign failure mode: a fortress balance sheet out-earning a fast-growing revenue base by a few basis points. With revenue compounding ~35% and rates stable, the ratio falls below 2.5% mechanically; two more clean quarters (by the January 2027 report) would clear the rolling window. Defensible mandate treatment: hold with purification and quarterly re-screening rather than forced exit.</p></div>
+
+<h3 class="subsection-heading">3d. Purification</h3>
+
+<div class="prose"><p>TTM interest income ~TWD 105B ≈ $3.4B; per ADR (5 ordinary shares) ≈ $0.66/ADR annual purification, plus the same proportion (~2.5%) of dividends received.</p></div>
+
+</section>
+<div class="section-divider"></div>
+<section class="section-block" id="s-4-financial-fundamentals">
+<div class="section-heading"><span class="section-num">4.</span><h2 class="section-title">Financial Fundamentals</h2></div>
+
+<div class="chart-wrap"><svg viewBox="0 0 620 270" style="width:100%;height:auto;display:block" xmlns="http://www.w3.org/2000/svg">
+  <line x1="54" y1="38.0" x2="604" y2="38.0" stroke="var(--grid-line)" stroke-width="1"/>
+  <text x="49" y="42.0" text-anchor="end" font-size="9.5" fill="var(--fg-faint)" font-family="var(--font-mono)">6.1</text>
+  <line x1="54" y1="86.0" x2="604" y2="86.0" stroke="var(--grid-line)" stroke-width="1"/>
+  <text x="49" y="90.0" text-anchor="end" font-size="9.5" fill="var(--fg-faint)" font-family="var(--font-mono)">4.6</text>
+  <line x1="54" y1="134.0" x2="604" y2="134.0" stroke="var(--grid-line)" stroke-width="1"/>
+  <text x="49" y="138.0" text-anchor="end" font-size="9.5" fill="var(--fg-faint)" font-family="var(--font-mono)">3.1</text>
+  <line x1="54" y1="182.0" x2="604" y2="182.0" stroke="var(--grid-line)" stroke-width="1"/>
+  <text x="49" y="186.0" text-anchor="end" font-size="9.5" fill="var(--fg-faint)" font-family="var(--font-mono)">1.5</text>
+  <line x1="54" y1="230.0" x2="604" y2="230.0" stroke="var(--grid-line)" stroke-width="1"/>
+  <text x="49" y="234.0" text-anchor="end" font-size="9.5" fill="var(--fg-faint)" font-family="var(--font-mono)">0.0</text>
+  <rect x="70.5" y="162.0" width="41.2" height="68.0" fill="#0f3d2e" rx="2" opacity="0.88"/>
+  <rect x="118.6" y="203.2" width="41.2" height="26.8" fill="#b8835a" rx="2" opacity="0.90"/>
+  <text x="115.2" y="246" text-anchor="middle" font-size="10.5" fill="var(--fg-muted)" font-family="var(--font-mono)">FY2023</text>
+  <rect x="208.0" y="139.0" width="41.2" height="91.0" fill="#0f3d2e" rx="2" opacity="0.88"/>
+  <rect x="256.1" y="193.5" width="41.2" height="36.5" fill="#b8835a" rx="2" opacity="0.90"/>
+  <text x="252.7" y="246" text-anchor="middle" font-size="10.5" fill="var(--fg-muted)" font-family="var(--font-mono)">FY2024</text>
+  <rect x="345.5" y="110.1" width="41.2" height="119.9" fill="#0f3d2e" rx="2" opacity="0.88"/>
+  <rect x="393.6" y="176.5" width="41.2" height="53.5" fill="#b8835a" rx="2" opacity="0.90"/>
+  <text x="390.2" y="246" text-anchor="middle" font-size="10.5" fill="var(--fg-muted)" font-family="var(--font-mono)">FY2025</text>
+  <rect x="483.0" y="67.3" width="41.2" height="162.7" fill="#0f3d2e" rx="2" opacity="0.88"/>
+  <rect x="531.1" y="149.7" width="41.2" height="80.3" fill="#b8835a" rx="2" opacity="0.90"/>
+  <text x="527.7" y="246" text-anchor="middle" font-size="10.5" fill="var(--fg-muted)" font-family="var(--font-mono)">FY2026E</text>
+  <line x1="54" y1="230" x2="604" y2="230" stroke="var(--border-strong)" stroke-width="1"/>
+  <rect x="54" y="16" width="11" height="9" fill="#0f3d2e" rx="2" opacity="0.88"/>
+  <text x="69" y="24" font-size="10" fill="var(--fg-muted)" font-family="var(--font-body)">Revenue</text>
+  <rect x="130" y="16" width="11" height="9" fill="#b8835a" rx="2"/>
+  <text x="145" y="24" font-size="10" fill="var(--fg-muted)" font-family="var(--font-body)">NPAT</text>
+  <text x="54" y="13" font-size="11.5" font-weight="600" fill="#0f3d2e" font-family="var(--font-body)">Revenue &amp; Net Income (TWD T)</text>
+</svg></div>
+
+<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Line</th><th>FY2023</th><th>FY2024</th><th>FY2025</th><th>FY2026E</th></tr></thead><tbody><tr><td>Revenue (TWD)</td><td>2.16T</td><td>2.89T (+33.9%)</td><td>3.81T (+31.6%)</td><td>5.17T (cons., +35.6%)</td></tr><tr><td>Gross margin</td><td>54.4%</td><td>56.1%</td><td>59.9%</td><td>~65% (Q1&#x27;26: 66.3% record)</td></tr><tr><td>Operating margin</td><td>42.6%</td><td>45.7%</td><td>50.9%</td><td>~57%</td></tr><tr><td>Net income (TWD)</td><td>852B</td><td>1.16T</td><td>1.70T (+46.6%)</td><td>2.55T (cons.)</td></tr><tr><td>EPS (TWD)</td><td>39.94</td><td>45.25</td><td>66.25</td><td>97.96 (cons., +47.9%)</td></tr><tr><td>DPS (TWD)</td><td>13.0</td><td>17.0</td><td>22.0 (+29%)</td><td>~28 (quarterly 7.0)</td></tr><tr><td>FCF (TWD)</td><td>69.8B</td><td>703B</td><td>664B</td><td>1.47T (cons.)</td></tr></tbody></table></div>
+
+<h3 class="subsection-heading">Balance sheet &amp; returns (2026-03-31)</h3>
+
+<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Metric</th><th>Value</th><th>Notes</th></tr></thead><tbody><tr><td>Cash &amp; ST investments</td><td>TWD 3.38T (~$108B)</td><td>Funds the global fab program internally</td></tr><tr><td>Total debt</td><td>TWD 1.02T</td><td>~1.7% of market cap</td></tr><tr><td>Net cash</td><td>TWD 2.37T (~$76B)</td><td>Grew 15% YoY despite record capex</td></tr><tr><td>Shareholders&#x27; equity</td><td>TWD 5.93T</td><td>ROE (TTM) ~35%</td></tr><tr><td>Capex FY26 guide</td><td>~$52–56B</td><td>AI capacity + advanced packaging</td></tr></tbody></table></div>
+
+<div class="prose"><p>The quality signature: at 35% revenue growth, TSMC still converts ~30% of revenue to free cash flow while spending $50B+ a year on fabs — and the net cash pile grows anyway. Q1 2026&#x27;s 58% net income growth with a 66.3% gross margin is the single best quarter in foundry history. The watch item is the margin cost of overseas fabs (Arizona dilutes GM ~2–3 points at maturity), so the current margin peak partly reflects Taiwan-weighted mix that will normalize.</p></div>
+
+<p class="source-note">Source: stockanalysis.com financials (Fiscal.ai, 2026-05-12, TWD); 20-F, EDGAR CIK 1046179.</p>
+
+</section>
+<div class="section-divider"></div>
+<section class="section-block" id="s-5-valuation">
+<div class="section-heading"><span class="section-num">5.</span><h2 class="section-title">Valuation</h2></div>
+
+<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Multiple</th><th>Current</th><th>Sector Median</th><th>5-yr Avg</th><th>Signal</th></tr></thead><tbody><tr><td>P/E (TTM)</td><td>31.7x</td><td>~28x (large-cap semis)</td><td>~22x</td><td>↓ slight premium to own history</td></tr><tr><td>Forward P/E (FY26)</td><td>22.2x</td><td>~25x peers (NVDA ~35x)</td><td>~18x</td><td>→ cheap for 48% EPS growth</td></tr><tr><td>PEG (FY26)</td><td>~0.46x</td><td>~1.5x</td><td>—</td><td>↑ strikingly cheap</td></tr><tr><td>EV/EBITDA (FY26E)</td><td>~12x</td><td>~16x</td><td>~11x</td><td>→</td></tr><tr><td>P/B</td><td>~7.0x</td><td>~5x</td><td>~6x</td><td>→</td></tr><tr><td>Dividend yield</td><td>0.62%</td><td>1.2%</td><td>1.5%</td><td>↓ payout deliberately low (capex priority)</td></tr></tbody></table></div>
+
+<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Scenario</th><th>Implied / Share</th><th>% vs Current</th><th>Key assumption</th></tr></thead><tbody><tr><td>Bear</td><td>$290</td><td>-32%</td><td>2027 AI digestion + margin normalization from overseas fabs; FY27 EPS ~TWD 105 at 17x</td></tr><tr><td>Base</td><td>$470</td><td>+10%</td><td>Consensus: FY26 EPS TWD 97.96, FY27 TWD 122; ~23x forward (≈ street median $472.50)</td></tr><tr><td>Bull</td><td>$600</td><td>+40%</td><td>AI supply shortage persists through 2028; pricing power compounds; 25x FY27 (street high)</td></tr><tr><td>Reverse DCF</td><td>~15% earnings CAGR for 8 yrs priced in</td><td>—</td><td>Modest vs the 35–48% currently printing — the geopolitical discount is the gap</td></tr></tbody></table></div>
+
+<div class="prose"><p>TSM is the valuation paradox of the AI trade: the most indispensable company in the supply chain trades at a PEG under 0.5 because the market prices Taiwan-strait risk into the multiple permanently. Investors are paid ~10 forward P/E points for bearing geography risk.</p></div>
+
+</section>
+<div class="section-divider"></div>
+<section class="section-block" id="s-6-analyst-coverage">
+<div class="section-heading"><span class="section-num">6.</span><h2 class="section-title">Analyst Coverage</h2></div>
+
+<div class="chart-wrap"><svg viewBox="0 0 620 100" style="width:100%;height:auto;display:block" xmlns="http://www.w3.org/2000/svg">
+  <text x="44" y="13" font-size="11.5" font-weight="600" fill="#0f3d2e" font-family="var(--font-body)">Analyst Target Range</text>
+  <line x1="44" y1="62" x2="576" y2="62" stroke="var(--border-strong)" stroke-width="2.5"/>
+  <circle cx="44.0" cy="62" r="7" fill="#9ca3af"/>
+  <text x="44.0" y="36" text-anchor="middle" font-size="9.5" fill="var(--fg-muted)" font-family="var(--font-mono)">Low</text>
+  <text x="44.0" y="24" text-anchor="middle" font-size="10.5" font-weight="600" fill="#9ca3af" font-family="var(--font-mono)">$354.00</text>
+  <circle cx="300.3" cy="62" r="7" fill="#0f3d2e"/>
+  <text x="300.3" y="84" text-anchor="middle" font-size="9.5" fill="var(--fg-muted)" font-family="var(--font-mono)">Median</text>
+  <text x="300.3" y="97" text-anchor="middle" font-size="10.5" font-weight="600" fill="#0f3d2e" font-family="var(--font-mono)">$472.50</text>
+  <circle cx="203.9" cy="62" r="7" fill="#b8835a"/>
+  <text x="203.9" y="36" text-anchor="middle" font-size="9.5" fill="var(--fg-muted)" font-family="var(--font-mono)">Current</text>
+  <text x="203.9" y="24" text-anchor="middle" font-size="10.5" font-weight="600" fill="#b8835a" font-family="var(--font-mono)">$427.92</text>
+  <circle cx="576.0" cy="62" r="7" fill="#9ca3af"/>
+  <text x="576.0" y="84" text-anchor="middle" font-size="9.5" fill="var(--fg-muted)" font-family="var(--font-mono)">High</text>
+  <text x="576.0" y="97" text-anchor="middle" font-size="10.5" font-weight="600" fill="#9ca3af" font-family="var(--font-mono)">$600.00</text>
+</svg></div>
+
+<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Analyst / Firm</th><th>Date</th><th>Rating</th><th>Prev.</th><th>Target</th><th>Prev. Tgt</th><th>Upside %</th></tr></thead><tbody><tr><td>Haas Liu — BofA</td><td>2026-06-04</td><td>Buy</td><td>=</td><td>$490</td><td>$490</td><td>+14.5%</td></tr><tr><td>Simon Coles — Barclays</td><td>2026-04-22</td><td>Buy</td><td>=</td><td>$470</td><td>$450</td><td>+9.8%</td></tr><tr><td>Gil Luria — D.A. Davidson</td><td>2026-04-17</td><td>Buy</td><td>=</td><td>$450</td><td>$450</td><td>+5.2%</td></tr><tr><td>Susquehanna</td><td>2026-04-16</td><td>Buy</td><td>=</td><td>$500</td><td>$500</td><td>+16.8%</td></tr><tr><td>Krish Sankar — TD Cowen</td><td>2026-04-16</td><td>Hold</td><td>=</td><td>$400</td><td>$400</td><td>-6.5%</td></tr><tr><td>Consensus (19 analysts)</td><td>2026-06-04</td><td>Strong Buy (12 SB / 5 B / 2 H / 0 S)</td><td>—</td><td>$467.84 avg / $472.50 median</td><td>—</td><td>+9.3%</td></tr><tr><td>Range</td><td>—</td><td>—</td><td>—</td><td>$354 low / $600 high</td><td>—</td><td>-17% to +41%</td></tr></tbody></table></div>
+
+<div class="prose"><p>No sell ratings, and unlike ASML the consensus sits comfortably above the price — the street&#x27;s models still show upside after the +100% year because earnings grew into the move. The standing debate is only how much Taiwan/geopolitical discount to apply, not the earnings trajectory.</p></div>
+
+<p class="source-note">Source: stockanalysis.com/stocks/tsm/forecast/ (S&amp;P Global + TipRanks, 2026-06-04).</p>
+
+</section>
+<div class="section-divider"></div>
+<section class="section-block" id="s-7-technical-analysis">
+<div class="section-heading"><span class="section-num">7.</span><h2 class="section-title">Technical Analysis</h2></div>
+
+<div class="chart-wrap"><svg viewBox="0 0 620 200" style="width:100%;height:auto;display:block" xmlns="http://www.w3.org/2000/svg">
+  <defs><linearGradient id="pg" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#2d6b4f" stop-opacity="0.16"/><stop offset="100%" stop-color="#2d6b4f" stop-opacity="0"/></linearGradient></defs>
+  <polygon points="52,166 52.0,153.8 54.2,153.1 56.4,152.5 58.6,154.4 60.8,152.3 63.0,153.2 65.2,153.3 67.5,155.2 69.7,154.8 71.9,150.3 74.1,149.1 76.3,148.5 78.5,146.5 80.7,147.4 82.9,148.2 85.1,144.2 87.3,143.6 89.5,146.2 91.7,146.8 94.0,145.0 96.2,145.9 98.4,145.6 100.6,146.4 102.8,142.6 105.0,142.4 107.2,138.7 109.4,141.1 111.6,141.8 113.8,143.7 116.0,141.1 118.2,140.5 120.4,138.7 122.7,140.0 124.9,140.6 127.1,139.9 129.3,140.5 131.5,143.4 133.7,141.7 135.9,144.7 138.1,145.2 140.3,140.0 142.5,140.4 144.7,140.3 146.9,139.3 149.2,140.6 151.4,140.8 153.6,141.8 155.8,140.6 158.0,144.6 160.2,146.4 162.4,147.0 164.6,144.4 166.8,143.3 169.0,141.8 171.2,141.6 173.4,142.0 175.6,145.4 177.9,146.5 180.1,145.2 182.3,143.4 184.5,139.7 186.7,138.0 188.9,136.3 191.1,131.9 193.3,132.6 195.5,132.4 197.7,131.5 199.9,131.2 202.1,130.8 204.4,128.2 206.6,129.9 208.8,126.3 211.0,121.7 213.2,122.6 215.4,124.5 217.6,126.0 219.8,126.1 222.0,123.3 224.2,119.1 226.4,119.3 228.6,117.4 230.8,112.7 233.1,116.6 235.3,111.8 237.5,113.9 239.7,122.7 241.9,112.5 244.1,115.7 246.3,111.7 248.5,113.9 250.7,116.1 252.9,114.9 255.1,116.3 257.3,118.9 259.6,118.1 261.8,116.1 264.0,114.6 266.2,113.1 268.4,111.5 270.6,112.4 272.8,113.6 275.0,111.6 277.2,116.6 279.4,116.7 281.6,118.7 283.8,120.0 286.0,116.0 288.3,117.9 290.5,118.1 292.7,122.0 294.9,120.8 297.1,122.1 299.3,123.9 301.5,121.9 303.7,124.1 305.9,125.2 308.1,120.9 310.3,120.8 312.5,118.4 314.8,117.7 317.0,119.5 319.2,117.4 321.4,115.9 323.6,117.1 325.8,116.2 328.0,113.0 330.2,112.3 332.4,109.2 334.6,111.6 336.8,117.5 339.0,119.4 341.2,119.8 343.5,124.4 345.7,120.8 347.9,118.9 350.1,116.9 352.3,115.2 354.5,114.4 356.7,112.5 358.9,113.4 361.1,114.0 363.3,112.1 365.5,104.9 367.7,103.7 370.0,101.3 372.2,105.3 374.4,105.6 376.6,103.0 378.8,99.3 381.0,99.6 383.2,101.5 385.4,94.8 387.6,94.5 389.8,101.4 392.0,101.9 394.2,101.3 396.4,97.9 398.7,98.9 400.9,96.3 403.1,94.5 405.3,95.8 407.5,99.9 409.7,94.9 411.9,97.5 414.1,102.1 416.3,99.8 418.5,91.5 420.7,88.5 422.9,85.6 425.2,80.0 427.4,82.7 429.6,83.5 431.8,84.5 434.0,85.4 436.2,86.3 438.4,81.6 440.6,81.8 442.8,74.7 445.0,73.8 447.2,78.8 449.4,79.8 451.6,82.3 453.9,89.6 456.1,87.6 458.3,89.2 460.5,96.1 462.7,91.6 464.9,92.3 467.1,88.9 469.3,97.1 471.5,96.3 473.7,95.5 475.9,92.8 478.1,95.8 480.4,96.1 482.6,100.5 484.8,96.3 487.0,94.1 489.2,92.0 491.4,101.9 493.6,101.6 495.8,106.3 498.0,96.5 500.2,94.9 502.4,96.0 504.6,94.8 506.8,93.1 509.1,83.7 511.3,83.9 513.5,81.6 515.7,82.1 517.9,77.3 520.1,79.5 522.3,84.9 524.5,81.6 526.7,83.6 528.9,82.7 531.1,73.9 533.3,76.1 535.6,67.0 537.8,65.9 540.0,71.7 542.2,71.0 544.4,70.0 546.6,69.2 548.8,67.4 551.0,70.7 553.2,59.3 555.4,61.7 557.6,62.8 559.8,66.1 562.0,69.4 564.3,68.3 566.5,60.1 568.7,66.2 570.9,70.0 573.1,71.5 575.3,67.4 577.5,64.9 579.7,66.1 581.9,62.5 584.1,57.8 586.3,56.8 588.5,59.7 590.8,51.9 593.0,46.8 595.2,51.4 597.4,47.6 599.6,61.2 601.8,55.9 604.0,55.4 604,166" fill="url(#pg)"/>
+  <polyline points="52.0,153.8 54.2,153.1 56.4,152.5 58.6,154.4 60.8,152.3 63.0,153.2 65.2,153.3 67.5,155.2 69.7,154.8 71.9,150.3 74.1,149.1 76.3,148.5 78.5,146.5 80.7,147.4 82.9,148.2 85.1,144.2 87.3,143.6 89.5,146.2 91.7,146.8 94.0,145.0 96.2,145.9 98.4,145.6 100.6,146.4 102.8,142.6 105.0,142.4 107.2,138.7 109.4,141.1 111.6,141.8 113.8,143.7 116.0,141.1 118.2,140.5 120.4,138.7 122.7,140.0 124.9,140.6 127.1,139.9 129.3,140.5 131.5,143.4 133.7,141.7 135.9,144.7 138.1,145.2 140.3,140.0 142.5,140.4 144.7,140.3 146.9,139.3 149.2,140.6 151.4,140.8 153.6,141.8 155.8,140.6 158.0,144.6 160.2,146.4 162.4,147.0 164.6,144.4 166.8,143.3 169.0,141.8 171.2,141.6 173.4,142.0 175.6,145.4 177.9,146.5 180.1,145.2 182.3,143.4 184.5,139.7 186.7,138.0 188.9,136.3 191.1,131.9 193.3,132.6 195.5,132.4 197.7,131.5 199.9,131.2 202.1,130.8 204.4,128.2 206.6,129.9 208.8,126.3 211.0,121.7 213.2,122.6 215.4,124.5 217.6,126.0 219.8,126.1 222.0,123.3 224.2,119.1 226.4,119.3 228.6,117.4 230.8,112.7 233.1,116.6 235.3,111.8 237.5,113.9 239.7,122.7 241.9,112.5 244.1,115.7 246.3,111.7 248.5,113.9 250.7,116.1 252.9,114.9 255.1,116.3 257.3,118.9 259.6,118.1 261.8,116.1 264.0,114.6 266.2,113.1 268.4,111.5 270.6,112.4 272.8,113.6 275.0,111.6 277.2,116.6 279.4,116.7 281.6,118.7 283.8,120.0 286.0,116.0 288.3,117.9 290.5,118.1 292.7,122.0 294.9,120.8 297.1,122.1 299.3,123.9 301.5,121.9 303.7,124.1 305.9,125.2 308.1,120.9 310.3,120.8 312.5,118.4 314.8,117.7 317.0,119.5 319.2,117.4 321.4,115.9 323.6,117.1 325.8,116.2 328.0,113.0 330.2,112.3 332.4,109.2 334.6,111.6 336.8,117.5 339.0,119.4 341.2,119.8 343.5,124.4 345.7,120.8 347.9,118.9 350.1,116.9 352.3,115.2 354.5,114.4 356.7,112.5 358.9,113.4 361.1,114.0 363.3,112.1 365.5,104.9 367.7,103.7 370.0,101.3 372.2,105.3 374.4,105.6 376.6,103.0 378.8,99.3 381.0,99.6 383.2,101.5 385.4,94.8 387.6,94.5 389.8,101.4 392.0,101.9 394.2,101.3 396.4,97.9 398.7,98.9 400.9,96.3 403.1,94.5 405.3,95.8 407.5,99.9 409.7,94.9 411.9,97.5 414.1,102.1 416.3,99.8 418.5,91.5 420.7,88.5 422.9,85.6 425.2,80.0 427.4,82.7 429.6,83.5 431.8,84.5 434.0,85.4 436.2,86.3 438.4,81.6 440.6,81.8 442.8,74.7 445.0,73.8 447.2,78.8 449.4,79.8 451.6,82.3 453.9,89.6 456.1,87.6 458.3,89.2 460.5,96.1 462.7,91.6 464.9,92.3 467.1,88.9 469.3,97.1 471.5,96.3 473.7,95.5 475.9,92.8 478.1,95.8 480.4,96.1 482.6,100.5 484.8,96.3 487.0,94.1 489.2,92.0 491.4,101.9 493.6,101.6 495.8,106.3 498.0,96.5 500.2,94.9 502.4,96.0 504.6,94.8 506.8,93.1 509.1,83.7 511.3,83.9 513.5,81.6 515.7,82.1 517.9,77.3 520.1,79.5 522.3,84.9 524.5,81.6 526.7,83.6 528.9,82.7 531.1,73.9 533.3,76.1 535.6,67.0 537.8,65.9 540.0,71.7 542.2,71.0 544.4,70.0 546.6,69.2 548.8,67.4 551.0,70.7 553.2,59.3 555.4,61.7 557.6,62.8 559.8,66.1 562.0,69.4 564.3,68.3 566.5,60.1 568.7,66.2 570.9,70.0 573.1,71.5 575.3,67.4 577.5,64.9 579.7,66.1 581.9,62.5 584.1,57.8 586.3,56.8 588.5,59.7 590.8,51.9 593.0,46.8 595.2,51.4 597.4,47.6 599.6,61.2 601.8,55.9 604.0,55.4" fill="none" stroke="#2d6b4f" stroke-width="2.0" stroke-linejoin="round" stroke-linecap="round"/>
+  <polyline points="160.2,145.2 162.4,145.0 164.6,144.8 166.8,144.7 169.0,144.4 171.2,144.2 173.4,144.0 175.6,143.8 177.9,143.6 180.1,143.4 182.3,143.3 184.5,143.1 186.7,142.9 188.9,142.7 191.1,142.4 193.3,142.1 195.5,141.8 197.7,141.6 199.9,141.3 202.1,141.0 204.4,140.6 206.6,140.3 208.8,139.9 211.0,139.4 213.2,139.0 215.4,138.7 217.6,138.4 219.8,138.1 222.0,137.8 224.2,137.3 226.4,136.8 228.6,136.4 230.8,135.9 233.1,135.4 235.3,134.8 237.5,134.3 239.7,133.9 241.9,133.3 244.1,132.8 246.3,132.1 248.5,131.5 250.7,131.0 252.9,130.5 255.1,130.0 257.3,129.6 259.6,129.2 261.8,128.7 264.0,128.1 266.2,127.6 268.4,126.9 270.6,126.3 272.8,125.6 275.0,124.9 277.2,124.4 279.4,123.9 281.6,123.4 283.8,123.0 286.0,122.4 288.3,121.8 290.5,121.3 292.7,120.9 294.9,120.5 297.1,120.2 299.3,119.9 301.5,119.7 303.7,119.6 305.9,119.4 308.1,119.2 310.3,119.0 312.5,118.7 314.8,118.5 317.0,118.3 319.2,118.1 321.4,118.0 323.6,117.9 325.8,117.8 328.0,117.5 330.2,117.2 332.4,116.9 334.6,116.8 336.8,116.8 339.0,116.8 341.2,116.9 343.5,117.1 345.7,117.3 347.9,117.4 350.1,117.3 352.3,117.3 354.5,117.3 356.7,117.3 358.9,117.3 361.1,117.3 363.3,117.2 365.5,117.0 367.7,116.7 370.0,116.3 372.2,116.1 374.4,115.9 376.6,115.7 378.8,115.5 381.0,115.2 383.2,115.0 385.4,114.6 387.6,114.2 389.8,113.9 392.0,113.6 394.2,113.2 396.4,112.8 398.7,112.4 400.9,112.0 403.1,111.5 405.3,111.0 407.5,110.5 409.7,109.9 411.9,109.5 414.1,109.0 416.3,108.5 418.5,107.9 420.7,107.3 422.9,106.6 425.2,105.9 427.4,105.1 429.6,104.4 431.8,103.8 434.0,103.2 436.2,102.6 438.4,102.0 440.6,101.3 442.8,100.7 445.0,99.9 447.2,99.1 449.4,98.3 451.6,97.6 453.9,96.9 456.1,96.2 458.3,95.6 460.5,95.2 462.7,94.7 464.9,94.3 467.1,93.8 469.3,93.5 471.5,93.1 473.7,92.8 475.9,92.6 478.1,92.4 480.4,92.3 482.6,92.2 484.8,92.0 487.0,91.8 489.2,91.7 491.4,91.7 493.6,91.8 495.8,92.0 498.0,92.0 500.2,91.9 502.4,91.8 504.6,91.6 506.8,91.5 509.1,91.2 511.3,91.0 513.5,90.7 515.7,90.5 517.9,90.0 520.1,89.7 522.3,89.4 524.5,89.0 526.7,88.7 528.9,88.5 531.1,88.2 533.3,88.1 535.6,87.8 537.8,87.5 540.0,87.2 542.2,87.0 544.4,86.6 546.6,86.3 548.8,86.0 551.0,85.8 553.2,85.5 555.4,85.2 557.6,84.9 559.8,84.7 562.0,84.4 564.3,84.0 566.5,83.4 568.7,83.0 570.9,82.4 573.1,82.0 575.3,81.5 577.5,81.1 579.7,80.4 581.9,79.8 584.1,79.0 586.3,78.3 588.5,77.6 590.8,76.7 593.0,75.6 595.2,74.7 597.4,73.8 599.6,73.2 601.8,72.3 604.0,71.3" fill="none" stroke="#b8835a" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/>
+  <polyline points="491.4,119.6 493.6,119.3 495.8,119.1 498.0,118.8 500.2,118.5 502.4,118.2 504.6,117.9 506.8,117.6 509.1,117.3 511.3,116.9 513.5,116.6 515.7,116.3 517.9,115.9 520.1,115.6 522.3,115.3 524.5,114.9 526.7,114.6 528.9,114.3 531.1,114.0 533.3,113.6 535.6,113.2 537.8,112.8 540.0,112.4 542.2,112.1 544.4,111.7 546.6,111.3 548.8,111.0 551.0,110.6 553.2,110.2 555.4,109.8 557.6,109.4 559.8,109.0 562.0,108.7 564.3,108.3 566.5,107.9 568.7,107.6 570.9,107.2 573.1,106.9 575.3,106.5 577.5,106.1 579.7,105.7 581.9,105.3 584.1,104.9 586.3,104.5 588.5,104.1 590.8,103.6 593.0,103.2 595.2,102.7 597.4,102.2 599.6,101.8 601.8,101.4 604.0,100.9" fill="none" stroke="#888888" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="4,3"/>
+  <line x1="52" y1="36.0" x2="604" y2="36.0" stroke="var(--grid-line)" stroke-width="1"/>
+  <text x="47" y="40.0" text-anchor="end" font-size="9.5" fill="var(--fg-faint)" font-family="var(--font-mono)">$470</text>
+  <line x1="52" y1="79.3" x2="604" y2="79.3" stroke="var(--grid-line)" stroke-width="1"/>
+  <text x="47" y="83.3" text-anchor="end" font-size="9.5" fill="var(--fg-faint)" font-family="var(--font-mono)">$376</text>
+  <line x1="52" y1="122.7" x2="604" y2="122.7" stroke="var(--grid-line)" stroke-width="1"/>
+  <text x="47" y="126.7" text-anchor="end" font-size="9.5" fill="var(--fg-faint)" font-family="var(--font-mono)">$281</text>
+  <line x1="52" y1="166.0" x2="604" y2="166.0" stroke="var(--grid-line)" stroke-width="1"/>
+  <text x="47" y="170.0" text-anchor="end" font-size="9.5" fill="var(--fg-faint)" font-family="var(--font-mono)">$186</text>
+  <line x1="52" y1="166" x2="604" y2="166" stroke="var(--border-strong)" stroke-width="1"/>
+  <text x="52" y="13" font-size="11.5" font-weight="600" fill="#0f3d2e" font-family="var(--font-body)">TSM ADR · 1Y daily close, 50DMA (amber) / 200DMA</text>
+</svg></div>
+
+<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Indicator</th><th>Value</th><th>Read</th></tr></thead><tbody><tr><td>Current price</td><td>$427.92</td><td>Consolidating below the $450 ATH; absorbed Friday&#x27;s -6.7% semis selloff and recovered</td></tr><tr><td>50DMA</td><td>$393</td><td>Price above — uptrend intact</td></tr><tr><td>200DMA</td><td>$328</td><td>Well above — primary trend strongly up</td></tr><tr><td>RSI (14)</td><td>56</td><td>Neutral after the pullback</td></tr><tr><td>MACD</td><td>+10.8 vs signal +11.3</td><td>Cooling</td></tr><tr><td>Key support</td><td>$405–415 zone, then $385–392</td><td>June 5 low / breakout shelf; April consolidation</td></tr><tr><td>Key resistance</td><td>$450 (ATH)</td><td>One clean level above</td></tr><tr><td>Beta</td><td>1.26</td><td>Moderate</td></tr><tr><td>Weekly volatility</td><td>~5%</td><td>The calmest of the portfolio&#x27;s AI names</td></tr></tbody></table></div>
+
+<p class="source-note">Source: Computed from IBKR daily closes, Jun 2025 – Jun 9, 2026.</p>
+
+</section>
+<div class="section-divider"></div>
+<section class="section-block" id="s-8-catalysts-risks">
+<div class="section-heading"><span class="section-num">8.</span><h2 class="section-title">Catalysts &amp; Risks</h2></div>
+
+<h3 class="subsection-heading">Catalysts</h3>
+
+<div class="prose"><ul><li>Q2 2026 earnings 2026-07-16 — watch FY26 revenue guide (consensus +35.6%) and any capex raise; monthly revenue prints (10th of each month) are the real-time tell.</li><li>N2 ramp economics — second-half 2026 volume production with reported strong pricing; first N2 margin data point re-rates FY27 estimates.</li><li>CoWoS/advanced packaging expansion — every increment is sold out; capacity adds convert directly to revenue.</li><li>AI sovereign/hyperscaler prepayments — customers paying deposits to reserve capacity (the ASML-ization of the foundry model).</li><li>Dividend acceleration — TWD 7.0/q (+40% YoY) signals a payout step-change as FCF inflects to TWD 1.47T.</li></ul></div>
+
+<h3 class="subsection-heading">Risks</h3>
+
+<div class="prose"><ul><li>Taiwan-strait geopolitics — the permanent tail risk; any blockade/conflict scenario is uninsurable at the position level and explains the structural multiple discount.</li><li>US export-control expansion (this week&#x27;s Senate letter) — compliance burden plus potential loss of China-linked revenue at the margin.</li><li>AI capex digestion 2027 — if hyperscaler orders pause, the +35% comp becomes a cliff; semis short interest at records (CNBC, Jun 9) shows the positioning.</li><li>Overseas fab margin dilution — Arizona/Dresden/Kumamoto cost structures shave 2–3 GM points as they scale.</li><li>Intel second-sourcing — Google/NVIDIA backup exploration is today a capacity story; by 2028 it could be a pricing story.</li><li>Shariah-mandate: PIF Step 3 borderline-fails on the stale window (Section 3) — monitor quarterly; do not add until a clean window prints if applying PIF strictly.</li></ul></div>
+
+</section>
+<div class="section-divider"></div>
+<section class="section-block" id="s-9-deep-dive-the-geopolitical-discount-quantified">
+<div class="section-heading"><span class="section-num">9.</span><h2 class="section-title">Deep-Dive: The Geopolitical Discount, Quantified</h2></div>
+
+<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Comparable</th><th>Fwd P/E</th><th>EPS growth FY26E</th><th>PEG</th></tr></thead><tbody><tr><td>TSMC</td><td>22.2x</td><td>+48%</td><td>0.46</td></tr><tr><td>NVIDIA</td><td>~35x</td><td>+45%</td><td>~0.78</td></tr><tr><td>ASML</td><td>~48x</td><td>+27%</td><td>~1.6</td></tr><tr><td>AMD</td><td>~38x</td><td>+50%</td><td>~0.76</td></tr></tbody></table></div>
+
+<div class="prose"><p>TSMC trades at roughly half the PEG of every other critical-path AI name. That gap is the market&#x27;s price for Taiwan risk — roughly $500–700B of suppressed market value. The investment question is whether you are being paid enough to hold the risk; at 0.46 PEG with the dividend growing 30%+ annually, the answer for a sized position (10 ADRs here) has historically been yes. The position sizing itself is the hedge: geography risk argues against making TSM a portfolio-dominant weight, not against owning it.</p></div>
+
+</section>
+<div class="section-divider"></div>
+<section class="section-block" id="s-10-summary-thesis">
+<div class="section-heading"><span class="section-num">10.</span><h2 class="section-title">Summary &amp; Thesis</h2></div>
+
+<div class="prose"><p>Bull case: the indispensable company of the AI era growing revenue 35% at record 66% gross margins, with a sold-out advanced-packaging franchise, a fortress balance sheet funding $50B+ capex from cash flow, and a valuation (22x forward, 0.46 PEG) that still embeds a deep geopolitical discount. Street consensus sees +9% to the median target with zero sell ratings.</p><p>Bear case: the cycle and the strait. A 2027 hyperscaler digestion year would compress both the E and the P/E simultaneously (the bear target $354 is only a 17x multiple on current-year earnings); export-control expansion chips at China-linked revenue; overseas fabs dilute the margin peak; and the tail risk that defines the discount cannot be diversified away within the position.</p><p>Shariah status: borderline — AAOIFI/Zoya/Musaffa all pass; the strict PIF four-quarter window fails on Q2–Q3 2025 interest income (2.6–2.7% vs 2.5%) with a clearly improving trend as revenue outgrows the cash yield. Treatment consistent with this portfolio&#x27;s DT precedent: hold, purify ~$0.66/ADR/year, re-run the screen at Q2 2026 results. As an investment, the highest-conviction core AI holding in the portfolio at the most reasonable price.</p></div>
+
+<h3 class="subsection-heading">What to watch next</h3>
+
+<div class="prose"><ul><li>2026-07-16 Q2: FY26 guide, capex raise, and the interest-income line (PIF re-check).</li><li>Monthly revenue (10th of each month) — the fastest public read on AI demand globally.</li><li>US export-control rulemaking following the June Senate letter.</li></ul></div>
+
+</section>
+      <div class="disclaimer-block"><strong>Disclaimer:</strong> This is research, not financial advice. Do your own due diligence.</div>
+
+    </div>
+  </main>
+
+</div>
+<script>
+(function() {
+  var sections = document.querySelectorAll('.section-block[id]');
+  var items    = document.querySelectorAll('.toc-item[data-target]');
+  if (!sections.length || !items.length) return;
+
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        items.forEach(function(it) {
+          it.classList.toggle('active', it.dataset.target === entry.target.id);
+        });
+      }
+    });
+  }, { rootMargin: '-15% 0px -72% 0px', threshold: 0 });
+
+  sections.forEach(function(s) { observer.observe(s); });
+
+  items.forEach(function(item) {
+    item.addEventListener('click', function(ev) {
+      ev.preventDefault();
+      var t = document.getElementById(item.dataset.target);
+      if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+})();
+</script>
+</body>
+</html>
